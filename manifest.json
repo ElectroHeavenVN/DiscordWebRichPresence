@@ -8,8 +8,7 @@
     },
     "author": "ElectroHeavenVN",
 	"permissions": [
-		"storage",
-		"scripting"
+		"storage"
 	],
 	"background": {
 		"service_worker": "background.js"
@@ -44,15 +43,71 @@
 				"content_script.js"
 			],
 			"run_at": "document_idle"
+		},
+		{
+			"matches": ["https://www.youtube.com/*"],
+			"all_frames": true,
+			"js": [
+				"youtube.js",
+				"content_script.js"
+			],
+			"run_at": "document_idle"
+		},
+		{
+			"matches": ["https://music.youtube.com/*"],
+			"all_frames": true,
+			"js": [
+				"youtubemusic.js",
+				"content_script.js"
+			],
+			"run_at": "document_idle"
+		},
+		{
+			"matches": [
+				"https://zingmp3.vn/*"
+			],
+			"all_frames": true,
+			"js": [
+				"zingmp3.js",
+				"content_script.js"
+			],
+			"run_at": "document_idle"
+		},
+		{
+			"matches": [
+				"https://www.nhaccuatui.com/bai-hat/*"
+			],
+			"all_frames": true,
+			"js": [
+				"nhaccuatui.js",
+				"content_script.js"
+			],
+			"run_at": "document_idle"
+		},
+		{
+			"matches": [
+				"https://beta.nhaccuatui.com/*"
+			],
+			"all_frames": true,
+			"js": [
+				"nctbeta.js",
+				"content_script.js"
+			],
+			"run_at": "document_idle"
+		},
+		{
+			"matches": [
+				"https://aniwave.to/watch/*",
+				"https://aniwave.bz/watch/*",
+				"https://aniwave.ws/watch/*",
+				"https://aniwave.vc/watch/*"
+			],
+			"all_frames": true,
+			"js": [
+				"aniwave.js",
+				"content_script.js"
+			],
+			"run_at": "document_idle"
 		}
-    ],
-    "web_accessible_resources": [
-        {
-            "resources": ["discord-inject.js"], 
-            "matches": [ "<all_urls>" ]
-        }
-    ],
-	"content_security_policy": {
-		"extension_pages": "default-src 'self' 'wasm-unsafe-eval';"
-	}
+    ]
 }

@@ -3,18 +3,17 @@ if (typeof browser === "undefined") {
     var browser = chrome;
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const masterSwitch = document.getElementById('masterSwitch');
     const dependentSwitches = document.querySelectorAll('.dependent-switch');
-    function sendUpdate()
-    {
+    function sendUpdate() {
         browser.runtime.sendMessage({
             action: "updateStatus",
             extEnabled: masterSwitch.checked,
             enabled: Array.from(dependentSwitches).map(s => s.checked)
         });
     }
-    masterSwitch.addEventListener('change', function() {
+    masterSwitch.addEventListener('change', function () {
         dependentSwitches.forEach(switchElem => {
             switchElem.disabled = !masterSwitch.checked;
             switchElem.closest('.switch').classList.toggle('disabled', switchElem.disabled);
@@ -28,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
         masterSwitch.dispatchEvent(new Event('change'));
     }
     dependentSwitches.forEach((dependentSwitch, index) => {
-        dependentSwitch.addEventListener('change', function() {
+        dependentSwitch.addEventListener('change', function () {
             localStorage.setItem(`switch${index}`, dependentSwitch.checked);
             sendUpdate();
         });
