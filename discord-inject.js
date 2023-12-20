@@ -184,8 +184,8 @@ async function GetActivities(currActivities) {
         }
         var data = await getExternalAssetsLink(activity.application_id, token, links);
         if (data.length == 2) {
-            activity.assets.large_image = "mp:" + data[0].external_asset_path;
-            activity.assets.small_image = "mp:" + data[1].external_asset_path;
+            lastLargeMpImage = activity.assets.large_image = "mp:" + data[0].external_asset_path;
+            lastSmallMpImage = activity.assets.small_image = "mp:" + data[1].external_asset_path;
         }
         else if (data.length == 1) {
             if (discordActivityData.large_image && discordActivityData.large_image !== "")
