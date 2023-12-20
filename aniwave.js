@@ -1,4 +1,4 @@
-const index = 0;
+const index = 4;
 const appId = "1187046060120621157";
 var lastPlaying = false;
 var lastTitle = "";
