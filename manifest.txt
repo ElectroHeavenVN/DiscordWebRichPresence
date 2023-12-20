@@ -1,0 +1,40 @@
+
+	"content_scripts": [
+		{
+			"matches": [
+				"https://discord.com/channels/*",
+				"https://ptb.discord.com/channels/*",
+				"https://canary.discord.com/channels/*"
+			],
+			"all_frames": true,
+			"js": ["discord.js"],
+			"run_at": "document_start"
+		},
+		{
+			"matches": ["https://soundcloud.com/*"],
+			"all_frames": true,
+			"js": [
+				"soundcloud.js",
+				"content_script.js"
+			],
+			"run_at": "document_idle"
+		},
+		{
+			"matches": ["https://www.youtube.com/*"],
+			"all_frames": true,
+			"js": [
+				"youtube.js",
+				"content_script.js"
+			],
+			"run_at": "document_idle"
+		},
+		{
+			"matches": ["https://music.youtube.com/*"],
+			"all_frames": true,
+			"js": [
+				"youtubemusic.js",
+				"content_script.js"
+			],
+			"run_at": "document_idle"
+		}
+	]

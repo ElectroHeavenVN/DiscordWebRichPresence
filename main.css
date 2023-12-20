@@ -1,0 +1,107 @@
+body {
+    background-color: #000;
+    color: #fff;
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 20px;
+    width: 300px; 
+    height: 200px; 
+    overflow: hidden;
+}
+
+.switch-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.switch-label {
+    margin-right: 10px;
+    font-size: 15px;
+    order: 1;
+}
+
+.master-switch,
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+    order: 2;
+}
+
+.switch input,
+.master-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #666; 
+    transition: .4s;
+    border-radius: 20px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: #fff; 
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #2196F3; 
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+    transform: translateX(20px);
+}
+
+.switch.disabled {
+    opacity: 0.5; 
+    pointer-events: none;
+}
+
+.switch.disabled .slider {
+    background-color: #888; 
+}
+
+.switch.disabled .slider:before {
+    background-color: #ccc; 
+}
+
+input:checked + .slider,
+.switch.active .slider {
+    background-color: #2196F3;
+}
+
+input:checked:disabled + .slider,
+.switch.active.disabled .slider {
+    background-color: #2196F3;
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked:disabled + .slider:before,
+.switch.active.disabled .slider:before {
+    transform: translateX(20px);
+}

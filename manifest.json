@@ -1,0 +1,58 @@
+{
+    "manifest_version": 3,
+    "name": "DiscordWebStatus",
+    "description": "Set your Discord status (rich presence) based on what website you're viewing!",
+    "version": "1.0",
+    "action": {
+        "default_popup": "main.html"
+    },
+    "author": "ElectroHeavenVN",
+	"permissions": [
+		"storage",
+		"scripting"
+	],
+	"background": {
+		"service_worker": "background.js"
+	},
+    "content_scripts": [
+		{
+			"matches": [
+				"https://discord.com/channels/*",
+				"https://ptb.discord.com/channels/*",
+				"https://canary.discord.com/channels/*"
+			],
+			"all_frames": true,
+			"js": ["discord.js"],
+			"run_at": "document_start"
+		},
+		{
+			"world": "MAIN",
+			"matches": [
+				"https://discord.com/channels/*",
+				"https://ptb.discord.com/channels/*",
+				"https://canary.discord.com/channels/*"
+			],
+			"all_frames": true,
+			"js": ["discord-inject.js"],
+			"run_at": "document_start"
+		},
+		{
+			"matches": ["https://soundcloud.com/*"],
+			"all_frames": true,
+			"js": [
+				"soundcloud.js",
+				"content_script.js"
+			],
+			"run_at": "document_idle"
+		}
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": ["discord-inject.js"], 
+            "matches": [ "<all_urls>" ]
+        }
+    ],
+	"content_security_policy": {
+		"extension_pages": "default-src 'self' 'wasm-unsafe-eval';"
+	}
+}
