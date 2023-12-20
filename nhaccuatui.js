@@ -1,4 +1,4 @@
-const index = 3;
+const index = 4;
 var lastPlaying = false;
 var lastSong = "";
 var lastTimeStamp = 0;
