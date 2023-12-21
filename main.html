@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DiscordWebStatus</title>
     <link rel="stylesheet" href="main.css">
 </head>
+
 <body>
 
-    <div class="switch-container">
+    <div class="switch-container" style="font-weight: bold;">
         <label class="switch-label">Enable Web status</label>
         <label class="master-switch">
             <input type="checkbox" id="masterSwitch">
@@ -16,8 +18,18 @@
         </label>
     </div>
 
+    <div class="separator"></div>
+
     <div class="switch-container">
-        <label class="switch-label">YouTube</label>
+        <label class="switch-label">
+            <a href="https://youtube.com/" target="_blank"
+                style="text-decoration: none; :hover{ text-decoration: none }">
+                <img src="img/youtube.png" alt="YouTube">
+            </a>
+            <a href="https://youtube.com/" target="_blank">
+                YouTube
+            </a>
+        </label>
         <label class="switch">
             <input type="checkbox" class="dependent-switch" disabled>
             <span class="slider"></span>
@@ -25,7 +37,15 @@
     </div>
 
     <div class="switch-container">
-        <label class="switch-label">YouTube Music</label>
+        <label class="switch-label">
+            <a href="https://youtube.com/" target="_blank"
+                style="text-decoration: none; :hover{ text-decoration: none }">
+                <img src="img/ytmusic.png" alt="YouTube Music">
+            </a>
+            <a href="https://music.youtube.com/" target="_blank">
+                YouTube Music
+            </a>
+        </label>
         <label class="switch">
             <input type="checkbox" class="dependent-switch" disabled>
             <span class="slider"></span>
@@ -33,23 +53,15 @@
     </div>
 
     <div class="switch-container">
-        <label class="switch-label">SoundCloud</label>
-        <label class="switch">
-            <input type="checkbox" class="dependent-switch" disabled>
-            <span class="slider"></span>
+        <label class="switch-label">
+            <a href="https://youtube.com/" target="_blank"
+                style="text-decoration: none; :hover{ text-decoration: none }">
+                <img src="img/soundcloud.png" alt="SoundCloud">
+            </a>
+            <a href="https://soundcloud.com/" target="_blank">
+                SoundCloud
+            </a>
         </label>
-    </div>
-    
-    <div class="switch-container">
-        <label class="switch-label">Zing MP3</label>
-        <label class="switch">
-            <input type="checkbox" class="dependent-switch" disabled>
-            <span class="slider"></span>
-        </label>
-    </div>
-    
-    <div class="switch-container">
-        <label class="switch-label">NhacCuaTui</label>
         <label class="switch">
             <input type="checkbox" class="dependent-switch" disabled>
             <span class="slider"></span>
@@ -57,7 +69,47 @@
     </div>
 
     <div class="switch-container">
-        <label class="switch-label">AniWave</label>
+        <label class="switch-label">
+            <a href="https://youtube.com/" target="_blank"
+                style="text-decoration: none; :hover{ text-decoration: none }">
+                <img src="img/zingmp3.png" alt="Zing MP3">
+            </a>
+            <a href="https://zingmp3.vn/" target="_blank">
+                Zing MP3
+            </a>
+        </label>
+        <label class="switch">
+            <input type="checkbox" class="dependent-switch" disabled>
+            <span class="slider"></span>
+        </label>
+    </div>
+
+    <div class="switch-container">
+        <label class="switch-label">
+            <a href="https://youtube.com/" target="_blank"
+                style="text-decoration: none; :hover{ text-decoration: none }">
+                <img src="img/nct.png" alt="NhacCuaTui">
+            </a>
+            <a href="https://www.nhaccuatui.com/" target="_blank">
+                NhacCuaTui
+            </a>
+        </label>
+        <label class="switch">
+            <input type="checkbox" class="dependent-switch" disabled>
+            <span class="slider"></span>
+        </label>
+    </div>
+
+    <div class="switch-container">
+        <label class="switch-label">
+            <a href="https://youtube.com/" target="_blank"
+                style="text-decoration: none; :hover{ text-decoration: none }">
+                <img src="img/aniwave.png" alt="AniWave">
+            </a>
+            <a href="https://aniwave.to/" target="_blank">
+                AniWave
+            </a>
+        </label>
         <label class="switch">
             <input type="checkbox" class="dependent-switch" disabled>
             <span class="slider"></span>
@@ -66,8 +118,12 @@
 
     <script src="main.js"></script>
     <footer>
-        <a href="https://github.com/electroHeavenVN/DiscordWebStatus/" target="_blank">Source code</a>
+        <div class="button-container">
+            <button id="repositoryButton">Source code</button>
+            <button id="resetButton">Reset curent status</button>
+        </div>
     </footer>
 
 </body>
+
 </html>

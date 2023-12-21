@@ -6,6 +6,8 @@ if (typeof browser === "undefined") {
 document.addEventListener('DOMContentLoaded', function () {
     const masterSwitch = document.getElementById('masterSwitch');
     const dependentSwitches = document.querySelectorAll('.dependent-switch');
+    const openLinkButton = document.getElementById('repositoryButton');
+    const resetButton = document.getElementById("resetButton");
     function sendUpdate() {
         browser.runtime.sendMessage({
             action: "updateStatus",
@@ -13,20 +15,14 @@ document.addEventListener('DOMContentLoaded', function () {
             enabled: Array.from(dependentSwitches).map(s => s.checked)
         });
     }
-    masterSwitch.addEventListener('change', function () {
-        dependentSwitches.forEach(switchElem => {
-            switchElem.disabled = !masterSwitch.checked;
-            switchElem.closest('.switch').classList.toggle('disabled', switchElem.disabled);
-        });
-        localStorage.setItem('enableWebStatus', masterSwitch.checked);
-        sendUpdate();
-    });
     const savedMasterSwitchState = localStorage.getItem('enableWebStatus');
     if (savedMasterSwitchState !== null) {
         masterSwitch.checked = savedMasterSwitchState === 'true';
         masterSwitch.dispatchEvent(new Event('change'));
     }
     dependentSwitches.forEach((dependentSwitch, index) => {
+        dependentSwitch.disabled = !masterSwitch.checked;
+        dependentSwitch.closest('.switch').classList.toggle('disabled', dependentSwitch.disabled);
         dependentSwitch.addEventListener('change', function () {
             localStorage.setItem(`switch${index}`, dependentSwitch.checked);
             sendUpdate();
@@ -36,7 +32,23 @@ document.addEventListener('DOMContentLoaded', function () {
             dependentSwitch.checked = savedDependentSwitchState === 'true';
         }
     });
-    const event = new Event('change');
-    masterSwitch.dispatchEvent(event);
-    sendUpdate();
+    masterSwitch.addEventListener('change', function () {
+        dependentSwitches.forEach(switchElem => {
+            switchElem.disabled = !masterSwitch.checked;
+            switchElem.closest('.switch').classList.toggle('disabled', switchElem.disabled);
+        });
+        localStorage.setItem('enableWebStatus', masterSwitch.checked);
+        sendUpdate();
+    });
+    openLinkButton.addEventListener('click', function () {
+        window.open('https://github.com/electroHeavenVN/DiscordWebStatus/', '_blank');
+    });
+    resetButton.addEventListener('click', function () {
+        browser.runtime.sendMessage({
+            action: "reset"
+        });
+    })
+    //const event = new Event('change');
+    //masterSwitch.dispatchEvent(event);
+    //sendUpdate();
 });

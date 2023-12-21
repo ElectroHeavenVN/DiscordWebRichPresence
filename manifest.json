@@ -97,10 +97,10 @@
 		},
 		{
 			"matches": [
-				"https://aniwave.to/watch/*",
-				"https://aniwave.bz/watch/*",
-				"https://aniwave.ws/watch/*",
-				"https://aniwave.vc/watch/*"
+				"https://aniwave.to/*",
+				"https://aniwave.bz/*",
+				"https://aniwave.ws/*",
+				"https://aniwave.vc/*"
 			],
 			"all_frames": true,
 			"js": [

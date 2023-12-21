@@ -3,6 +3,7 @@ const appId = "890343617762304070"; //Official SoundCloud Discord application
 var lastPlaying = false;
 var lastSong = "";
 var lastTimeStamp = 0;
+var sentReset = false;
 
 function convertTimeToTimestamp(timeString) {
     const timeComponents = timeString.split(':');
@@ -26,16 +27,18 @@ function convertTimeToTimestamp(timeString) {
     return totalSeconds * 1000;
 }
 
-refreshInfo = () => {
+function refreshInfo()
+{
     if (!listening)
         return;
     let playing = false,
         song = "",
         songLink = "",
         songAuthor = "",
+        songAuthorLink = "",
         artworkLink = "";
-    let elapsed = convertTimeToTimestamp(document.querySelector("div.playbackTimeline__timePassed > span:nth-child(2)").textContent);
-    let total = convertTimeToTimestamp(document.querySelector("div.playbackTimeline__duration > span:nth-child(2)").textContent);
+    let elapsed = convertTimeToTimestamp(document.querySelector("div.playbackTimeline__timePassed > span:nth-child(2)").innerText);
+    let total = convertTimeToTimestamp(document.querySelector("div.playbackTimeline__duration > span:nth-child(2)").innerText);
     if (document.querySelector(".playControls__play") != null) {
         playing = document.querySelector(".playControls__play").classList.contains("playing");
     }
@@ -46,7 +49,7 @@ refreshInfo = () => {
         songAuthorLink = document.querySelector(".playbackSoundBadge__titleContextContainer.sc-mr-3x > a").href;
         artworkLink = window.getComputedStyle(document.querySelector(".playControls__elements > div.playControls__soundBadge.sc-ml-3x > div > a > div > span"), false).backgroundImage.slice(4, -1).replace(/"/g, "");
     }
-    if (lastPlaying != playing || lastSong != song || Math.abs(Date.now() - lastTimeStamp - elapsed) >= 1000) {
+    if (lastPlaying !== playing || lastSong !== song || Math.abs(Date.now() - lastTimeStamp - elapsed) >= 1000) {
         lastPlaying = playing;
         lastSong = song;
         lastTimeStamp = Date.now() - elapsed;
@@ -56,34 +59,31 @@ refreshInfo = () => {
                 dontSave: true,
                 type: 2,
                 name: "SoundCloud",
-                streamurl: "",
                 details: song,
                 state: "by " + songAuthor,
-                partycur: "",
-                partymax: "",
                 large_image: artworkLink,
                 time_start: lastTimeStamp,
                 time_end: Date.now() - elapsed + total,
-                large_text: "",
-                small_image: "",
-                small_text: "",
                 button1_text: "Listen on SoundCloud",
                 button1_url: songLink,
                 button2_text: "View artist",
                 button2_url: songAuthorLink,
             };
+            sentReset = false;
             setTimeout(() => {
                 browser.runtime.sendMessage({
                     index,
                     status: data
                 });
             }, 1000);
-        } else {
+        } else if (!sentReset) {
             data = false;
             try {
                 browser.runtime.sendMessage({
+                    index,
                     action: "reset"
                 });
+                sentReset = true;
             } catch (e) { }
         }
     }

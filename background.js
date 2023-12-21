@@ -3,11 +3,14 @@ let discordPort, webPort;
 if (typeof browser === "undefined") {
 	var browser = chrome;
 }
-//reference: https://stackoverflow.com/a/66618269/22911487
+var activities = [];
 
+//reference: https://stackoverflow.com/a/66618269/22911487
 const keepAlive = () => setInterval(chrome.runtime.getPlatformInfo, 20000);
 browser.runtime.onStartup.addListener(keepAlive);
 keepAlive();
+
+setInterval(checkDisconnectedActivities, 5000);
 
 function resetActivity() {
 	if (discordPort !== undefined) {
@@ -34,6 +37,34 @@ function resetActivity() {
 	}
 };
 
+function checkDisconnectedActivities() {
+	browser.storage.local.get("status", status => {
+		console.log('checking activities...')
+		status = status.status;
+		if (activities.length == 0) {
+			console.log('No activity');
+			return;
+		}
+		else 
+		console.log(activities.length + ' activity in total: ', activities);
+		var oldLength = activities.length;
+		while (activities.length > 0 && Date.now() - activities[0].lastTimeAlive > 10000) {
+			console.log('remove 1st activity')
+			activities.splice(0, 1);
+		}
+		if (oldLength != activities.length && activities.length > 0) {
+			if (status.enabled[activities[0].index]) {
+				console.log('send next activity');
+				discordPort.postMessage(activities[0].activity);
+			}
+		}
+		if (activities.length == 0) {
+			console.log('send reset');
+			resetActivity();
+		}
+	});
+}
+
 browser.runtime.onConnect.addListener(port => {
 	browser.storage.local.get("status", status => {
 		status = status.status;
@@ -45,9 +76,9 @@ browser.runtime.onConnect.addListener(port => {
 				discordPort.disconnect();
 			}
 			discordPort = port;
-			console.info("Discord port opened");
+			console.info("Discord connected");
 			port.onDisconnect.addListener(() => {
-				console.info("Discord port closed");
+				console.info("Discord disconnected");
 				discordPort = undefined;
 				if (webPort !== undefined) {
 					webPort.postMessage({
@@ -67,23 +98,16 @@ browser.runtime.onConnect.addListener(port => {
 			}
 		}
 		else if (port.name == "webStatus") {
-			if (webPort !== undefined) {
-				webPort.postMessage({ action: "close" });
-				webPort.disconnect();
-			}
-			webPort = port;
-			console.info("Port opened");
+			if (webPort == undefined)
+				webPort = port;
+			console.info("New web connected");
 			port.onDisconnect.addListener(() => {
-				console.info("Port closed");
-				webPort = undefined;
-				resetActivity();
+				console.info("A web disconnected");
 			})
-			if (webPort !== undefined) {
-				webPort.postMessage({
-					listen: true,
-					enabled: status.enabled
-				});
-			}
+			port.postMessage({
+				listen: true,
+				enabled: status.enabled
+			});
 		}
 		else {
 			console.error("Denied connection with unexpected name: ", port.name);
@@ -104,11 +128,23 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 				})
 				if (!request.extEnabled) {
 					resetActivity();
+					activities = [];
 					break;
 				}
 				if (webPort !== undefined) {
 					if (!request.enabled[request.index])
-						resetActivity();
+						{
+							browser.storage.local.get("status", status => {
+								status = status.status;
+								while (activities.length > 0 && !status.enabled[activities[0].index])
+									activities.splice(0, 1);
+								if (activities.length > 0 && status.enabled[activities[0].index]) {
+									discordPort.postMessage(activities[0].activity);
+								}
+								else
+									resetActivity();
+							});
+						}
 					webPort.postMessage({
 						listen: true,
 						enabled: request.enabled
@@ -118,10 +154,33 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 					resetActivity();
 				break;
 			case "reset":
-				resetActivity();
+				if (request.index !== undefined) {
+					var index = activities.map(o => o.index).indexOf(request.index);
+					if (index != -1)
+						activities.splice(index, 1);
+					browser.storage.local.get("status", status => {
+						status = status.status;
+						while (activities.length > 0 && Date.now() - activities[0].lastTimeAlive > 10000)
+							activities.splice(0, 1);
+						if (activities.length > 0 && status.enabled[activities[0].index]) {
+							if (index == 0)
+								discordPort.postMessage(activities[0].activity);
+						}
+						else
+							resetActivity();
+					});
+				}
+				else {
+					resetActivity();
+					activities = [];
+				}
 				sendResponse();
 				break;
-
+			case "ping":
+				var index = activities.map(o => o.index).indexOf(request.index);
+				if (index != -1 && typeof (activities[index].lastTimeAlive) !== "undefined")
+					activities[index].lastTimeAlive = Date.now();
+				break;
 			default:
 				console.error("Unknown action", request.action);
 		}
@@ -132,8 +191,30 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 				status = status.status;
 				if (status.extEnabled == undefined || !status.extEnabled)
 					return;
-				if (status.enabled[request.index])
-					discordPort.postMessage(request.status);
+				var index = activities.map(o => o.index).indexOf(request.index);
+				if (status.enabled[request.index]) {
+					if (index != -1) {
+						activities[index] = {
+							index: request.index,
+							activity: request.status,
+							lastTimeAlive: Date.now()
+						};
+					}
+					else
+						activities.push({
+							index: request.index,
+							activity: request.status,
+							lastTimeAlive: Date.now()
+						});
+				}
+				else
+					activities.splice(index, 1);
+				while (activities.length > 0 && Date.now() - activities[0].lastTimeAlive > 10000)
+					activities.splice(0, 1);
+				if (activities.length > 0 && status.enabled[activities[0].index]) {
+					if (activities[0].index == request.index)
+						discordPort.postMessage(activities[0].activity);
+				}
 				else
 					resetActivity();
 			});

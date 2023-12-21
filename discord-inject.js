@@ -6,6 +6,7 @@ var lastLargeImage = "";
 var lastSmallImage = "";
 var lastLargeMpImage = "";
 var lastSmallMpImage = "";
+var discordGateway;
 
 const originalWebSocket = window.WebSocket,
     originalWebSocketProperties = ["binaryType", "bufferedAmount", "extensions", "onclose", "onmessage", "onopen", "protocol", "readyState", "url"];
@@ -14,8 +15,8 @@ window.WebSocket = function (u, p) {
     this.downstreamSocket = new originalWebSocket(u, p);
     var newGateway = false;
     if (/gateway.*\.discord.gg/.test(u)) {
-        newGateway = window.discordGateway != undefined;
-        window.discordGateway = this.downstreamSocket;
+        newGateway = discordGateway != undefined;
+        discordGateway = this.downstreamSocket;
     }
     for (let i in originalWebSocketProperties) {
         Object.defineProperty(this, originalWebSocketProperties[i], {
@@ -26,14 +27,14 @@ window.WebSocket = function (u, p) {
     if (/gateway.*\.discord.gg/.test(u) && newGateway) {
         setTimeout(() => {
             SendDiscordActivity();
-        }, 1000);
+        }, 3000);
     }
 }
 window.WebSocket.prototype.send = function (d) {
     var cancelSend = false;
-    if (this.downstreamSocket == window.discordGateway) {
+    if (this.downstreamSocket === discordGateway) {
         const start = d.substr(0, 8);
-        if (start == '{"op":3,') {
+        if (start === '{"op":3,') {
             const j = JSON.parse(d);
             st = j.d.status;
             since = j.d.since;
@@ -69,24 +70,24 @@ document.addEventListener('rpc', function (msg) {
 
 var discordActivityData = {
     sendUpdate: false,
-    activityType: 0,
+    type: 0,
     application_id: "0",
-    activityName: "",
-    activityUrl: "https://twitch.tv/settings",
-    activityDetails: "",
-    activityState: "",
-    activityPartyCur: "",
-    activityPartyMax: "",
-    large_image: "",
-    large_text: "",
-    small_image: "",
-    small_text: "",
-    time_start: 0,
-    time_end: 0,
-    button1_text: 0,
-    button1_url: "",
-    button2_text: "",
-    button2_url: "",
+    name: "",
+    streamUrl: "https://twitch.tv/settings",
+    details: "",
+    state: "",
+    partyCur: "",
+    partyMax: "",
+    largeImage: "",
+    largeText: "",
+    smallImage: "",
+    smallText: "",
+    timeStart: 0,
+    timeEnd: 0,
+    button1Text: 0,
+    button1Url: "",
+    button2Text: "",
+    button2Url: "",
 }
 
 function SendDiscordActivity() {
@@ -106,13 +107,13 @@ function SendDiscordActivity() {
 }
 
 async function GetActivities(currActivities) {
-    if (discordActivityData.application_id == "0")
+    if (typeof(discordActivityData.application_id) !== "string" || discordActivityData.application_id === null || discordActivityData.application_id.length === 0 || discordActivityData.application_id === "0")
         return currActivities;
     let activity = {
         application_id: discordActivityData.application_id,
-        type: discordActivityData.activityType,
+        type: discordActivityData.type,
         flags: 1 << 0,
-        name: discordActivityData.activityName,
+        name: discordActivityData.name,
         assets: {},
         buttons: [],
         metadata: {
@@ -121,53 +122,53 @@ async function GetActivities(currActivities) {
         timestamps: {}
     };
 
-    if (discordActivityData.activityType == 1)
-        activity.url = window.activityUrl;
-    if (discordActivityData.activityPartyCur != "" && discordActivityData.activityPartyMax != "")
+    if (discordActivityData.type === 1)
+        activity.url = discordActivityData.streamUrl;
+    if (typeof(discordActivityData.details) === "string" && discordActivityData.details !== null && discordActivityData.details.length > 0)
+        activity.details = discordActivityData.details;
+    if (typeof(discordActivityData.state) === "string" && discordActivityData.state !== null && discordActivityData.state.length > 0)
+        activity.state = discordActivityData.state;
+    if (discordActivityData.timeStart)
+        activity.timestamps.start = discordActivityData.timeStart;
+    if (discordActivityData.timeEnd)
+        activity.timestamps.end = discordActivityData.timeEnd;
+    if (typeof(discordActivityData.largeText) === "string" && discordActivityData.largeText !== null && discordActivityData.largeText.length > 0)
+        activity.assets.large_text = discordActivityData.largeText;
+    if (typeof(discordActivityData.smallText) === "string" && discordActivityData.smallText !== null && discordActivityData.smallText.length > 0)
+        activity.assets.small_text = discordActivityData.smallText;
+    if (typeof(discordActivityData.button1Text) === "string" && discordActivityData.button1Text !== null && discordActivityData.button1Text.length > 0)
+        activity.buttons[0] = discordActivityData.button1Text;
+    if (typeof(discordActivityData.button1Url) === "string" && discordActivityData.button1Url !== null && discordActivityData.button1Url.length > 0)
+        activity.metadata.button_urls[0] = discordActivityData.button1Url;
+    if (typeof(discordActivityData.button2Text) === "string" && discordActivityData.button2Text !== null && discordActivityData.button2Text.length > 0)
+        activity.buttons[1] = discordActivityData.button2Text;
+    if (typeof(discordActivityData.button2Url) === "string" && discordActivityData.button2Url !== null && discordActivityData.button2Url.length > 0)
+        activity.metadata.button_urls[1] = discordActivityData.button2Url;
+    if (typeof(discordActivityData.partyCur) === "number" && typeof(discordActivityData.partyMax) === "number")
         activity.party = {
             size: [
-                discordActivityData.activityPartyCur,
-                discordActivityData.activityPartyMax
+                discordActivityData.partyCur.toString(),
+                discordActivityData.partyMax.toString()
             ]
         };
-    if (discordActivityData.activityDetails)
-        activity.details = discordActivityData.activityDetails;
-    if (discordActivityData.activityState)
-        activity.state = discordActivityData.activityState;
-    if (discordActivityData.time_start)
-        activity.timestamps.start = discordActivityData.time_start;
-    if (discordActivityData.time_end)
-        activity.timestamps.end = discordActivityData.time_end;
-    if (discordActivityData.large_text)
-        activity.assets.large_text = discordActivityData.large_text;
-    if (discordActivityData.small_text)
-        activity.assets.small_text = discordActivityData.small_text;
-    if (discordActivityData.button1_text)
-        activity.buttons[0] = discordActivityData.button1_text;
-    if (discordActivityData.button1_url)
-        activity.metadata.button_urls[0] = discordActivityData.button1_url;
-    if (discordActivityData.button2_text)
-        activity.buttons[1] = discordActivityData.button2_text;
-    if (discordActivityData.button2_url)
-        activity.metadata.button_urls[1] = discordActivityData.button2_url;
     let links = [];
-    if (discordActivityData.large_image && discordActivityData.large_image !== "") {
-        if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/attachments\//.test(discordActivityData.large_image))
-        activity.assets.large_image = "mp:" + discordActivityData.large_image.replace(/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");
-        else if (lastLargeImage == discordActivityData.large_image)
-        activity.assets.large_image = lastLargeMpImage;
+    if (typeof(discordActivityData.largeImage) === "string" && discordActivityData.largeImage !== null && discordActivityData.largeImage.length > 0) {
+        if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/attachments\//.test(discordActivityData.largeImage))
+            activity.assets.large_image = "mp:" + discordActivityData.largeImage.replace(/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");
+        else if (lastLargeImage === discordActivityData.largeImage)
+            activity.assets.large_image = lastLargeMpImage;
         else
-            links.push(discordActivityData.large_image);
-        lastLargeImage = discordActivityData.large_image;
+            links.push(discordActivityData.largeImage);
+        lastLargeImage = discordActivityData.largeImage;
     }
-    if (discordActivityData.small_image && discordActivityData.small_image !== "") {
-        if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/attachments\//.test(discordActivityData.small_image))
-        activity.assets.small_image = "mp:" + discordActivityData.small_image.replace(/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");
-        else if (lastSmallImage == discordActivityData.small_image)
+    if (typeof(discordActivityData.smallImage) === "string" && discordActivityData.smallImage !== null && discordActivityData.smallImage.length > 0) {
+        if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/attachments\//.test(discordActivityData.smallImage))
+            activity.assets.small_image = "mp:" + discordActivityData.smallImage.replace(/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");
+        else if (lastSmallImage === discordActivityData.smallImage)
             activity.assets.small_image = lastSmallMpImage;
         else
-            links.push(discordActivityData.small_image);
-        lastSmallImage = discordActivityData.small_image;
+            links.push(discordActivityData.smallImage);
+        lastSmallImage = discordActivityData.smallImage;
     }
     if (links.length > 0) {
         let token = null;
@@ -183,15 +184,11 @@ async function GetActivities(currActivities) {
             return currActivities;
         }
         var data = await getExternalAssetsLink(activity.application_id, token, links);
-        if (data.length == 2) {
-            lastLargeMpImage = activity.assets.large_image = "mp:" + data[0].external_asset_path;
-            lastSmallMpImage = activity.assets.small_image = "mp:" + data[1].external_asset_path;
-        }
-        else if (data.length == 1) {
-            if (discordActivityData.large_image && discordActivityData.large_image !== "")
-                lastLargeMpImage = activity.assets.large_image = "mp:" + data[0].external_asset_path;
-            if (discordActivityData.small_image && discordActivityData.small_image !== "")
-                lastSmallMpImage = activity.assets.small_image = "mp:" + data[0].external_asset_path;
+        for (let i = 0; i < data.length; i++) {
+            if (discordActivityData.largeImage === data[i].url)
+                lastLargeMpImage = activity.assets.large_image = "mp:" + data[i].external_asset_path;
+            if (discordActivityData.smallImage === data[i].url)
+                lastSmallMpImage = activity.assets.small_image = "mp:" + data[i].external_asset_path;
         }
     }
     var currActivitiesCopy = currActivities.map(o => ({ ...o }));
@@ -214,27 +211,27 @@ async function getExternalAssetsLink(appId, token, links) {
 
 function SetDiscordActivityData(msg) {
     var appId = msg.application_id;
-    if (appId != "0" || discordActivityData.application_id != appId) {
+    if (appId !== "0" || discordActivityData.application_id !== appId) {
         discordActivityData = {
             sendUpdate: true,
-            activityType: msg.type,
+            type: msg.type,
             application_id: appId,
-            activityName: msg.name,
-            activityUrl: msg.streamurl,
-            activityDetails: msg.details,
-            activityState: msg.state,
-            activityPartyCur: msg.partycur,
-            activityPartyMax: msg.partymax,
-            large_image: msg.large_image,
-            large_text: msg.large_text,
-            small_image: msg.small_image,
-            small_text: msg.small_text,
-            time_start: msg.time_start,
-            time_end: msg.time_end,
-            button1_text: msg.button1_text,
-            button1_url: msg.button1_url,
-            button2_text: msg.button2_text,
-            button2_url: msg.button2_url,
+            name: msg.name,
+            streamUrl: msg.streamurl,
+            details: msg.details,
+            state: msg.state,
+            partyCur: msg.partycur,
+            partyMax: msg.partymax,
+            largeImage: msg.large_image,
+            largeText: msg.large_text,
+            smallImage: msg.small_image,
+            smallText: msg.small_text,
+            timeStart: msg.time_start,
+            timeEnd: msg.time_end,
+            button1Text: msg.button1_text,
+            button1Url: msg.button1_url,
+            button2Text: msg.button2_text,
+            button2Url: msg.button2_url,
         }
         window.SendDiscordActivity();
     }

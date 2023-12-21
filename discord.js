@@ -1,9 +1,10 @@
 if (typeof browser === "undefined") {
 	var browser = chrome;
 }
-let port = browser.runtime.connect({ name: "discord" }), closeOK = false;
+let port = browser.runtime.connect({ name: "discord" }),
+	closeOK = false;
 port.onMessage.addListener(msg => {
-	console.info(msg);
+	//console.info(msg);
 	if (msg.action) {
 		switch (msg.action) {
 			case "close":
@@ -18,7 +19,7 @@ port.onMessage.addListener(msg => {
 	}
 })
 port.onDisconnect.addListener(() => {
-	console.info("port closed " + closeOK);
+	console.info("port " + closeOK ? "closed" : "disconnected with error");
 	if (closeOK) {
 		closeOK = false;
 	}
