@@ -21,7 +21,7 @@ body {
     color: #00a8fc;
 }
 
-.switch-label a:hover{
+.switch-label a:hover {
     text-decoration: underline;
 }
 
@@ -115,30 +115,17 @@ input:checked:disabled+.slider:before,
     transform: translateX(20px);
 }
 
-.button-container {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 20px;
-}
-
-#repositoryButton,
 #resetButton {
-    width: 50%;
+    width: 100%;
     height: 50px;
-    padding: 0;
     border: none;
     background-color: #3498db;
     cursor: pointer;
     border-radius: 8px;
-    font-size: 14px;
+    font-size: 16px;
     color: #ffffff;
 }
 
-#resetButton {
-    margin-left: 10px;
-}
-
-#repositoryButton:hover,
 #resetButton:hover {
     background-color: #2980b9;
 }
@@ -155,4 +142,18 @@ input:checked:disabled+.slider:before,
     height: 20px;
     border-radius: 15%;
     vertical-align: top;
+}
+
+.footer-container {
+    text-align: center;
+}
+
+.footer-container a {
+    text-decoration: none;
+    color: #00a8fc;
+    font-size: 10px;
+}
+
+.footer-container a:hover {
+    text-decoration: underline;
 }

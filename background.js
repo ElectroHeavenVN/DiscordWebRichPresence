@@ -16,26 +16,35 @@ function resetActivity() {
 	if (discordPort !== undefined) {
 		discordPort.postMessage({
 			type: 0,
-			application_id: "0",
+			applicationId: "0",
 			name: "",
-			streamurl: "",
+			streamUrl: "",
 			details: "",
 			state: "",
-			partycur: "",
-			partymax: "",
-			large_image: "",
-			large_text: "",
-			small_image: "",
-			small_text: "",
-			time_start: "",
-			time_end: "",
-			button1_text: "",
-			button1_url: "",
-			button2_text: "",
-			button2_url: "",
+			partyCur: "",
+			partyMax: "",
+			largeImage: "",
+			largeText: "",
+			smallImage: "",
+			smallText: "",
+			timeStart: "",
+			timeEnd: "",
+			button1Text: "",
+			button1Url: "",
+			button2Text: "",
+			button2Url: "",
 		})
 	}
 };
+
+function removeOldActivities() {
+	for (let i = activities.length - 1; i >= 0; i--) {
+		if (Date.now() - activities[i].lastTimeAlive > 10000) {
+			console.log('remove activity at index ' + i);
+			activities.splice(0, 1);
+		}
+	}
+}
 
 function checkDisconnectedActivities() {
 	browser.storage.local.get("status", status => {
@@ -45,21 +54,16 @@ function checkDisconnectedActivities() {
 			console.log('No activity');
 			return;
 		}
-		else 
-		console.log(activities.length + ' activity in total: ', activities);
+		else
+			console.log('Number of activities: ' + activities.length + "\r\n", activities);
 		var oldLength = activities.length;
-		while (activities.length > 0 && Date.now() - activities[0].lastTimeAlive > 10000) {
-			console.log('remove 1st activity')
-			activities.splice(0, 1);
-		}
-		if (oldLength != activities.length && activities.length > 0) {
-			if (status.enabled[activities[0].index]) {
-				console.log('send next activity');
-				discordPort.postMessage(activities[0].activity);
-			}
+		removeOldActivities();
+		if (oldLength != activities.length && activities.length > 0 && status.enabled[activities[0].index]) {
+			console.log('Send next activity to Discord');
+			discordPort.postMessage(activities[0].activity);
 		}
 		if (activities.length == 0) {
-			console.log('send reset');
+			console.log('Reset Discord activity');
 			resetActivity();
 		}
 	});
@@ -76,9 +80,9 @@ browser.runtime.onConnect.addListener(port => {
 				discordPort.disconnect();
 			}
 			discordPort = port;
-			console.info("Discord connected");
+			console.info("New connection from Discord tab");
 			port.onDisconnect.addListener(() => {
-				console.info("Discord disconnected");
+				console.info("Discord tab disconnected");
 				discordPort = undefined;
 				if (webPort !== undefined) {
 					webPort.postMessage({
@@ -100,9 +104,9 @@ browser.runtime.onConnect.addListener(port => {
 		else if (port.name == "webStatus") {
 			if (webPort == undefined)
 				webPort = port;
-			console.info("New web connected");
+			console.info("New connection from other tab");
 			port.onDisconnect.addListener(() => {
-				console.info("A web disconnected");
+				console.info("Another tab disconnected");
 			})
 			port.postMessage({
 				listen: true,
@@ -132,19 +136,18 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 					break;
 				}
 				if (webPort !== undefined) {
-					if (!request.enabled[request.index])
-						{
-							browser.storage.local.get("status", status => {
-								status = status.status;
-								while (activities.length > 0 && !status.enabled[activities[0].index])
-									activities.splice(0, 1);
-								if (activities.length > 0 && status.enabled[activities[0].index]) {
-									discordPort.postMessage(activities[0].activity);
-								}
-								else
-									resetActivity();
-							});
-						}
+					if (!request.enabled[request.index]) {
+						browser.storage.local.get("status", status => {
+							status = status.status;
+							while (activities.length > 0 && !status.enabled[activities[0].index])
+								activities.splice(0, 1);
+							if (activities.length > 0 && status.enabled[activities[0].index]) {
+								discordPort.postMessage(activities[0].activity);
+							}
+							else
+								resetActivity();
+						});
+					}
 					webPort.postMessage({
 						listen: true,
 						enabled: request.enabled
@@ -160,8 +163,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 						activities.splice(index, 1);
 					browser.storage.local.get("status", status => {
 						status = status.status;
-						while (activities.length > 0 && Date.now() - activities[0].lastTimeAlive > 10000)
-							activities.splice(0, 1);
+						removeOldActivities();
 						if (activities.length > 0 && status.enabled[activities[0].index]) {
 							if (index == 0)
 								discordPort.postMessage(activities[0].activity);
@@ -186,38 +188,31 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 		}
 	}
 	else {
-		if (discordPort !== undefined) {
-			browser.storage.local.get("status", status => {
-				status = status.status;
-				if (status.extEnabled == undefined || !status.extEnabled)
-					return;
-				var index = activities.map(o => o.index).indexOf(request.index);
-				if (status.enabled[request.index]) {
-					if (index != -1) {
-						activities[index] = {
-							index: request.index,
-							activity: request.status,
-							lastTimeAlive: Date.now()
-						};
-					}
-					else
-						activities.push({
-							index: request.index,
-							activity: request.status,
-							lastTimeAlive: Date.now()
-						});
-				}
+		browser.storage.local.get("status", status => {
+			status = status.status;
+			if (status.extEnabled == undefined || !status.extEnabled)
+				return;
+			var index = activities.map(o => o.index).indexOf(request.index);
+			if (status.enabled[request.index]) {
+				var activity = {
+					index: request.index,
+					activity: request.status,
+					lastTimeAlive: Date.now()
+				};
+				if (index != -1) 
+					activities[index] = activity;
 				else
-					activities.splice(index, 1);
-				while (activities.length > 0 && Date.now() - activities[0].lastTimeAlive > 10000)
-					activities.splice(0, 1);
-				if (activities.length > 0 && status.enabled[activities[0].index]) {
-					if (activities[0].index == request.index)
-						discordPort.postMessage(activities[0].activity);
-				}
-				else
-					resetActivity();
-			});
-		}
+					activities.push(activity);
+			}
+			else
+				activities.splice(index, 1);
+			removeOldActivities();
+			if (activities.length > 0 && status.enabled[activities[0].index]) {
+				if (discordPort !== undefined && activities[0].index == request.index)
+					discordPort.postMessage(activities[0].activity);
+			}
+			else
+				resetActivity();
+		});
 	}
 })

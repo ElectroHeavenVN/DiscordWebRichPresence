@@ -6,12 +6,11 @@ var lastchannelProfilePicture = "";
 var lastTimeStamp = 0;
 var sentReset = false;
 
-function refreshInfo()
-{
+function refreshInfo() {
     let playing = false,
         title = "";
     if (listening) {
-        if (location.pathname === "/watch" || document.querySelector("#movie_player > div.ytp-miniplayer-ui") != null) {
+        if (location.pathname === "/watch" || location.pathname === "/embed/" || document.querySelector("#movie_player > div.ytp-miniplayer-ui") != null) {
             if (document.querySelector(".html5-video-player") != null) {
                 playing = document.querySelector(".html5-video-player").classList.contains("playing-mode");
             }
@@ -30,7 +29,12 @@ function refreshInfo()
         if (total == NaN || elapsed == NaN)
             return;
     }
-    var channelProfilePicture = document.querySelector("#owner > ytd-video-owner-renderer > a").querySelector("#img").src;
+    var channelProfilePicture = "";
+    var videoOwner = document.querySelector("#owner > ytd-video-owner-renderer > a");
+    if (videoOwner != null)
+        channelProfilePicture = videoOwner.querySelector("#img").src;
+    if (document.querySelector("#content > #page-manager> ytd-watch-flexy") == null)
+        return;
     var videoId = document.querySelector("#content > #page-manager> ytd-watch-flexy").getAttribute("video-id");
     if (lastPlaying !== playing || lastTitle !== title || channelProfilePicture !== lastchannelProfilePicture || (!isLiveStreaming && Math.abs(Date.now() - lastTimeStamp - elapsed) >= 1000)) {
         lastPlaying = playing;
@@ -46,21 +50,21 @@ function refreshInfo()
         }
         if (playing) {
             data = {
-                application_id: appId,
+                applicationId: appId,
                 dontSave: true,
-                type: 3,
+                type: ActivityType.Watching,
                 name: "YouTube",
                 details: title,
-                state: "by " + document.querySelector("#upload-info > #channel-name > #container > #text-container > #text > a").innerText,
-                time_end: timeEnd,
-                time_start: lastTimeStamp,
-                large_image: "https://i.ytimg.com/vi/" + videoId + "/hqdefault.jpg",
-                small_image: channelProfilePicture,
-                small_text: document.querySelector("#upload-info > #channel-name > #container > #text-container > #text > a").innerText,
-                button1_text: isLiveStreaming ? "Watch livestream on YouTube" : "Watch video on YouTube",
-                button1_url: "https://www.youtube.com/watch?v=" + videoId,
-                button2_text: "View channel",
-                button2_url: document.querySelector("#upload-info > #channel-name > #container > #text-container > #text > a").href,
+                state: "by " + document.querySelector("#upload-info > #channel-name > #container > #text-container > #text > a")?.innerText,
+                timeEnd: timeEnd,
+                timeStart: lastTimeStamp,
+                largeImage: "https://i.ytimg.com/vi/" + videoId + "/hqdefault.jpg",
+                smallImage: channelProfilePicture,
+                smallText: document.querySelector("#upload-info > #channel-name > #container > #text-container > #text > a")?.innerText,
+                button1Text: isLiveStreaming ? "Watch livestream on YouTube" : "Watch video on YouTube",
+                button1Url: "https://www.youtube.com/watch?v=" + videoId,
+                button2Text: "View channel",
+                button2Url: document.querySelector("#upload-info > #channel-name > #container > #text-container > #text > a").href,
             };
             sentReset = false;
             setTimeout(() => {
@@ -68,7 +72,7 @@ function refreshInfo()
                     index,
                     status: data
                 });
-            }, 1000);
+            }, 10);
         } else if (!sentReset) {
             data = false;
             try {

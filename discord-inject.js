@@ -7,9 +7,32 @@ var lastSmallImage = "";
 var lastLargeMpImage = "";
 var lastSmallMpImage = "";
 var discordGateway;
+var activityQueue = [];
+var sendingActivity;
 
-const originalWebSocket = window.WebSocket,
-    originalWebSocketProperties = ["binaryType", "bufferedAmount", "extensions", "onclose", "onmessage", "onopen", "protocol", "readyState", "url"];
+var discordActivityData = {
+    type: 0,
+    applicationId: "0",
+    name: "",
+    streamUrl: "https://twitch.tv/settings",
+    details: "",
+    state: "",
+    partyCur: "",
+    partyMax: "",
+    largeImage: "",
+    largeText: "",
+    smallImage: "",
+    smallText: "",
+    timeStart: 0,
+    timeEnd: 0,
+    button1Text: 0,
+    button1Url: "",
+    button2Text: "",
+    button2Url: "",
+};
+
+const originalWebSocket = window.WebSocket;
+const originalWebSocketProperties = ["binaryType", "bufferedAmount", "extensions", "onclose", "onmessage", "onopen", "protocol", "readyState", "url"];
 
 window.WebSocket = function (u, p) {
     this.downstreamSocket = new originalWebSocket(u, p);
@@ -29,7 +52,8 @@ window.WebSocket = function (u, p) {
             SendDiscordActivity();
         }, 3000);
     }
-}
+};
+
 window.WebSocket.prototype.send = function (d) {
     var cancelSend = false;
     if (this.downstreamSocket === discordGateway) {
@@ -55,10 +79,12 @@ window.WebSocket.prototype.send = function (d) {
     }
     if (!cancelSend)
         this.downstreamSocket.send(d);
-}
+};
+
 window.WebSocket.prototype.close = function (c, r) {
     this.downstreamSocket.close(c, r);
-}
+};
+
 window.WebSocket.CONNECTING = originalWebSocket.CONNECTING;
 window.WebSocket.OPEN = originalWebSocket.OPEN;
 window.WebSocket.CLOSING = originalWebSocket.CLOSING;
@@ -68,51 +94,47 @@ document.addEventListener('rpc', function (msg) {
     SetDiscordActivityData(msg.detail);
 });
 
-var discordActivityData = {
-    sendUpdate: false,
-    type: 0,
-    application_id: "0",
-    name: "",
-    streamUrl: "https://twitch.tv/settings",
-    details: "",
-    state: "",
-    partyCur: "",
-    partyMax: "",
-    largeImage: "",
-    largeText: "",
-    smallImage: "",
-    smallText: "",
-    timeStart: 0,
-    timeEnd: 0,
-    button1Text: 0,
-    button1Url: "",
-    button2Text: "",
-    button2Url: "",
-}
-
 function SendDiscordActivity() {
-    if (window.discordGateway && window.discordGateway.readyState == originalWebSocket.OPEN) {
+    if (discordGateway && discordGateway.readyState == originalWebSocket.OPEN) {
         GetActivities([]).then(activities => {
-            window.discordGateway.send(JSON.stringify({
+            var activity = {
                 op: 3,
                 d: {
                     status: st,
                     activities: activities,
                     since,
-                    afk
+                    afk,
                 }
-            }));
+            };
+            if (activityQueue.length == 0) {
+                discordGateway.send(JSON.stringify(activity));
+                setTimeout(() => {
+                    if (activityQueue.length == 1) {
+                        activityQueue = [];
+                    }
+                }, 5000);
+            }
+            else {
+                if (!sendingActivity)
+                    setTimeout(() => {
+                        sendingActivity = true;
+                        discordGateway.send(JSON.stringify(activityQueue[activityQueue.length - 1]));
+                        activityQueue = [];
+                        sendingActivity = false;
+                    }, 5000);
+            }
+            activityQueue.push(activity);
         });
     }
 }
 
 async function GetActivities(currActivities) {
-    if (typeof(discordActivityData.application_id) !== "string" || discordActivityData.application_id === null || discordActivityData.application_id.length === 0 || discordActivityData.application_id === "0")
+    if (typeof (discordActivityData.applicationId) !== "string" || discordActivityData.applicationId === null || discordActivityData.applicationId.length === 0 || discordActivityData.applicationId === "0")
         return currActivities;
     let activity = {
-        application_id: discordActivityData.application_id,
+        application_id: discordActivityData.applicationId,
         type: discordActivityData.type,
-        flags: 1 << 0,
+        flags: 1,
         name: discordActivityData.name,
         assets: {},
         buttons: [],
@@ -121,30 +143,31 @@ async function GetActivities(currActivities) {
         },
         timestamps: {}
     };
-
+    if (typeof (discordActivityData.flags) === "number")
+        activity.flags = discordActivityData.flags;
     if (discordActivityData.type === 1)
         activity.url = discordActivityData.streamUrl;
-    if (typeof(discordActivityData.details) === "string" && discordActivityData.details !== null && discordActivityData.details.length > 0)
+    if (typeof (discordActivityData.details) === "string" && discordActivityData.details !== null && discordActivityData.details.length > 0)
         activity.details = discordActivityData.details;
-    if (typeof(discordActivityData.state) === "string" && discordActivityData.state !== null && discordActivityData.state.length > 0)
+    if (typeof (discordActivityData.state) === "string" && discordActivityData.state !== null && discordActivityData.state.length > 0)
         activity.state = discordActivityData.state;
     if (discordActivityData.timeStart)
         activity.timestamps.start = discordActivityData.timeStart;
     if (discordActivityData.timeEnd)
         activity.timestamps.end = discordActivityData.timeEnd;
-    if (typeof(discordActivityData.largeText) === "string" && discordActivityData.largeText !== null && discordActivityData.largeText.length > 0)
+    if (typeof (discordActivityData.largeText) === "string" && discordActivityData.largeText !== null && discordActivityData.largeText.length > 0)
         activity.assets.large_text = discordActivityData.largeText;
-    if (typeof(discordActivityData.smallText) === "string" && discordActivityData.smallText !== null && discordActivityData.smallText.length > 0)
+    if (typeof (discordActivityData.smallText) === "string" && discordActivityData.smallText !== null && discordActivityData.smallText.length > 0)
         activity.assets.small_text = discordActivityData.smallText;
-    if (typeof(discordActivityData.button1Text) === "string" && discordActivityData.button1Text !== null && discordActivityData.button1Text.length > 0)
+    if (typeof (discordActivityData.button1Text) === "string" && discordActivityData.button1Text !== null && discordActivityData.button1Text.length > 0)
         activity.buttons[0] = discordActivityData.button1Text;
-    if (typeof(discordActivityData.button1Url) === "string" && discordActivityData.button1Url !== null && discordActivityData.button1Url.length > 0)
+    if (typeof (discordActivityData.button1Url) === "string" && discordActivityData.button1Url !== null && discordActivityData.button1Url.length > 0)
         activity.metadata.button_urls[0] = discordActivityData.button1Url;
-    if (typeof(discordActivityData.button2Text) === "string" && discordActivityData.button2Text !== null && discordActivityData.button2Text.length > 0)
+    if (typeof (discordActivityData.button2Text) === "string" && discordActivityData.button2Text !== null && discordActivityData.button2Text.length > 0)
         activity.buttons[1] = discordActivityData.button2Text;
-    if (typeof(discordActivityData.button2Url) === "string" && discordActivityData.button2Url !== null && discordActivityData.button2Url.length > 0)
+    if (typeof (discordActivityData.button2Url) === "string" && discordActivityData.button2Url !== null && discordActivityData.button2Url.length > 0)
         activity.metadata.button_urls[1] = discordActivityData.button2Url;
-    if (typeof(discordActivityData.partyCur) === "number" && typeof(discordActivityData.partyMax) === "number")
+    if (typeof (discordActivityData.partyCur) === "number" && typeof (discordActivityData.partyMax) === "number")
         activity.party = {
             size: [
                 discordActivityData.partyCur.toString(),
@@ -152,7 +175,7 @@ async function GetActivities(currActivities) {
             ]
         };
     let links = [];
-    if (typeof(discordActivityData.largeImage) === "string" && discordActivityData.largeImage !== null && discordActivityData.largeImage.length > 0) {
+    if (typeof (discordActivityData.largeImage) === "string" && discordActivityData.largeImage !== null && discordActivityData.largeImage.length > 0) {
         if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/attachments\//.test(discordActivityData.largeImage))
             activity.assets.large_image = "mp:" + discordActivityData.largeImage.replace(/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");
         else if (lastLargeImage === discordActivityData.largeImage)
@@ -161,7 +184,7 @@ async function GetActivities(currActivities) {
             links.push(discordActivityData.largeImage);
         lastLargeImage = discordActivityData.largeImage;
     }
-    if (typeof(discordActivityData.smallImage) === "string" && discordActivityData.smallImage !== null && discordActivityData.smallImage.length > 0) {
+    if (typeof (discordActivityData.smallImage) === "string" && discordActivityData.smallImage !== null && discordActivityData.smallImage.length > 0) {
         if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/attachments\//.test(discordActivityData.smallImage))
             activity.assets.small_image = "mp:" + discordActivityData.smallImage.replace(/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");
         else if (lastSmallImage === discordActivityData.smallImage)
@@ -210,29 +233,29 @@ async function getExternalAssetsLink(appId, token, links) {
 }
 
 function SetDiscordActivityData(msg) {
-    var appId = msg.application_id;
-    if (appId !== "0" || discordActivityData.application_id !== appId) {
+    var appId = msg.applicationId;
+    if (appId !== "0" || discordActivityData.applicationId !== appId) {
         discordActivityData = {
-            sendUpdate: true,
+            flags: msg.flags,
             type: msg.type,
-            application_id: appId,
+            applicationId: appId,
             name: msg.name,
-            streamUrl: msg.streamurl,
+            streamUrl: msg.streamUrl,
             details: msg.details,
             state: msg.state,
-            partyCur: msg.partycur,
-            partyMax: msg.partymax,
-            largeImage: msg.large_image,
-            largeText: msg.large_text,
-            smallImage: msg.small_image,
-            smallText: msg.small_text,
-            timeStart: msg.time_start,
-            timeEnd: msg.time_end,
-            button1Text: msg.button1_text,
-            button1Url: msg.button1_url,
-            button2Text: msg.button2_text,
-            button2Url: msg.button2_url,
+            partyCur: msg.partyCur,
+            partyMax: msg.partyMax,
+            largeImage: msg.largeImage,
+            largeText: msg.largeText,
+            smallImage: msg.smallImage,
+            smallText: msg.smallText,
+            timeStart: msg.timeStart,
+            timeEnd: msg.timeEnd,
+            button1Text: msg.button1Text,
+            button1Url: msg.button1Url,
+            button2Text: msg.button2Text,
+            button2Url: msg.button2Url,
         }
-        window.SendDiscordActivity();
+        SendDiscordActivity();
     }
 }

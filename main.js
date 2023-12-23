@@ -6,7 +6,6 @@ if (typeof browser === "undefined") {
 document.addEventListener('DOMContentLoaded', function () {
     const masterSwitch = document.getElementById('masterSwitch');
     const dependentSwitches = document.querySelectorAll('.dependent-switch');
-    const openLinkButton = document.getElementById('repositoryButton');
     const resetButton = document.getElementById("resetButton");
     function sendUpdate() {
         browser.runtime.sendMessage({
@@ -39,9 +38,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         localStorage.setItem('enableWebStatus', masterSwitch.checked);
         sendUpdate();
-    });
-    openLinkButton.addEventListener('click', function () {
-        window.open('https://github.com/electroHeavenVN/DiscordWebStatus/', '_blank');
     });
     resetButton.addEventListener('click', function () {
         browser.runtime.sendMessage({

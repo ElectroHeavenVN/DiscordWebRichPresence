@@ -34,17 +34,17 @@ function refreshInfo()
             lastTimeStamp = Date.now() - elapsed;
             if (playing) {
                 data = {
-                    application_id: appId,
+                    applicationId: appId,
                     dontSave: true,
-                    type: 2,
+                    type: ActivityType.Listening,
                     name: "NhacCuaTui",
                     details: title,
                     state: "bởi " + songAuthors,
-                    large_image: artworkLink,
-                    time_start: lastTimeStamp,
-                    time_end: Date.now() - elapsed + total,
-                    button1_text: "Nghe trên NhacCuaTui Beta",
-                    button1_url: songLink,
+                    largeImage: artworkLink,
+                    timeStart: lastTimeStamp,
+                    timeEnd: Date.now() - elapsed + total,
+                    button1Text: "Nghe trên NhacCuaTui Beta",
+                    button1Url: songLink,
                 };
                 sentReset = false;
                 setTimeout(() => {
@@ -52,7 +52,7 @@ function refreshInfo()
                         index,
                         status: data
                     });
-                }, 1000);
+                }, 10);
             } else if (!sentReset) {
                 data = false;
                 try {

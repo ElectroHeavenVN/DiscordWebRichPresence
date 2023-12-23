@@ -34,19 +34,19 @@ function refreshInfo()
             lastTimeStamp = Date.now() - elapsed;
             if (playing) {
                 data = {
-                    application_id: appId,
+                    applicationId: appId,
                     dontSave: true,
-                    type: 2,
+                    type: ActivityType.Listening,
                     name: "YouTube Music",
                     details: title,
                     state: "by " + author,
-                    large_image: "https://i.ytimg.com/vi/" + videoId + "/hqdefault.jpg",
-                    time_start: lastTimeStamp,
-                    time_end: Date.now() - elapsed + total,
-                    button1_text: "Listen on YouTube Music",
-                    button1_url: "https://music.youtube.com/watch?v=" + videoId,
-                    button2_text: "View channel",
-                    button2_url: document.querySelector("#layout > ytmusic-player-bar > div.middle-controls.style-scope.ytmusic-player-bar > div.content-info-wrapper.style-scope.ytmusic-player-bar > span > span.subtitle.style-scope.ytmusic-player-bar > yt-formatted-string > a").href,
+                    largeImage: "https://i.ytimg.com/vi/" + videoId + "/hqdefault.jpg",
+                    timeStart: lastTimeStamp,
+                    timeEnd: Date.now() - elapsed + total,
+                    button1Text: "Listen on YouTube Music",
+                    button1Url: "https://music.youtube.com/watch?v=" + videoId,
+                    button2Text: "View channel",
+                    button2Url: document.querySelector("#layout > ytmusic-player-bar > div.middle-controls.style-scope.ytmusic-player-bar > div.content-info-wrapper.style-scope.ytmusic-player-bar > span > span.subtitle.style-scope.ytmusic-player-bar > yt-formatted-string > a").href,
                 };
                 sentReset = false;
                 setTimeout(() => {
@@ -54,7 +54,7 @@ function refreshInfo()
                         index,
                         status: data
                     });
-                }, 1000);
+                }, 10);
             } else if (!sentReset) {
                 data = false;
                 try {

@@ -1,6 +1,16 @@
 if (typeof browser === "undefined") {
     var browser = chrome;
 }
+
+const ActivityType = {
+    Game: 0,
+    Streaming: 1,
+    Listening: 2,
+    Watching: 3,
+    Custom: 4,
+    Competing: 5
+};
+
 var port = browser.runtime.connect({
     name: "webStatus"
 });

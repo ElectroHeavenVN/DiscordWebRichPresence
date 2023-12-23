@@ -36,18 +36,18 @@ function refreshInfo()
         lastEp = currentEp;
         if (playing) {
             data = {
-                application_id: appId,
+                applicationId: appId,
                 dontSave: true,
-                type: 3,
+                type: ActivityType.Watching,
                 name: "AniWave",
                 details: title,
                 state: currentEp,
-                time_start: Date.now(),
-                large_image: cover,
-                button1_text: "Watch on AniWave",
-                button1_url: link,
-                button2_text: "Official AniWave site",
-                button2_url: window.location.origin,
+                timeStart: Date.now(),
+                largeImage: cover,
+                button1Text: "Watch on AniWave",
+                button1Url: link,
+                button2Text: "Official AniWave site",
+                button2Url: window.location.origin,
             };
             sentReset = false;
             setTimeout(() => {
@@ -55,7 +55,7 @@ function refreshInfo()
                     index,
                     status: data
                 });
-            }, 1000);
+            }, 10);
         } else if (!sentReset) {
             data = false;
             try {

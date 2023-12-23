@@ -55,19 +55,19 @@ function refreshInfo()
         lastTimeStamp = Date.now() - elapsed;
         if (playing) {
             data = {
-                application_id: appId,
+                applicationId: appId,
                 dontSave: true,
-                type: 2,
+                type: ActivityType.Listening,
                 name: "SoundCloud",
                 details: song,
                 state: "by " + songAuthor,
-                large_image: artworkLink,
-                time_start: lastTimeStamp,
-                time_end: Date.now() - elapsed + total,
-                button1_text: "Listen on SoundCloud",
-                button1_url: songLink,
-                button2_text: "View artist",
-                button2_url: songAuthorLink,
+                largeImage: artworkLink,
+                timeStart: lastTimeStamp,
+                timeEnd: Date.now() - elapsed + total,
+                button1Text: "Listen on SoundCloud",
+                button1Url: songLink,
+                button2Text: "View artist",
+                button2Url: songAuthorLink,
             };
             sentReset = false;
             setTimeout(() => {
@@ -75,7 +75,7 @@ function refreshInfo()
                     index,
                     status: data
                 });
-            }, 1000);
+            }, 10);
         } else if (!sentReset) {
             data = false;
             try {
