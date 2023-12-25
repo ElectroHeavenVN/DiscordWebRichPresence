@@ -12,7 +12,7 @@ const ActivityType = {
 };
 
 var port = browser.runtime.connect({
-    name: "webStatus"
+    name: "webRichPresence"
 });
 var listening = false;
 var data = false;

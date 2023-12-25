@@ -4,6 +4,20 @@ if (typeof browser === "undefined") {
 	var browser = chrome;
 }
 var activities = [];
+var enableJoinButton;
+var enableSpotifyButtons;
+
+const ActivityFlags = {
+	Instance: 1 << 0,
+	Join: 1 << 1,
+	Spectate: 1 << 2,
+	JoinRequest: 1 << 3,
+	Sync: 1 << 4,
+	Play: 1 << 5,
+	PartyPrivacyFriends: 1 << 6,
+	PartyPrivacyVoiceChannel: 1 << 7,
+	Embedded: 1 << 8,
+}
 
 //reference: https://stackoverflow.com/a/66618269/22911487
 const keepAlive = () => setInterval(chrome.runtime.getPlatformInfo, 20000);
@@ -12,10 +26,24 @@ keepAlive();
 
 setInterval(checkDisconnectedActivities, 5000);
 
+browser.storage.local.get("settings", settings => {
+	settings = settings.settings;
+	enableJoinButton = settings.enableJoinButton;
+	enableSpotifyButtons = settings.enableSpotifyButtons;
+});
+
+function sendMessageToDiscordTab(message) {
+	if (discordPort === undefined)
+		return;
+	console.log("send message to Discord tab:", message);
+	discordPort.postMessage(message);
+}
+
 function resetActivity() {
 	if (discordPort !== undefined) {
-		discordPort.postMessage({
+		sendMessageToDiscordTab({
 			type: 0,
+			flags: ActivityFlags.Instance,
 			applicationId: "0",
 			name: "",
 			streamUrl: "",
@@ -35,7 +63,7 @@ function resetActivity() {
 			button2Url: "",
 		})
 	}
-};
+}
 
 function removeOldActivities() {
 	for (let i = activities.length - 1; i >= 0; i--) {
@@ -60,7 +88,7 @@ function checkDisconnectedActivities() {
 		removeOldActivities();
 		if (oldLength != activities.length && activities.length > 0 && status.enabled[activities[0].index]) {
 			console.log('Send next activity to Discord');
-			discordPort.postMessage(activities[0].activity);
+			sendMessageToDiscordTab(activities[0].activity);
 		}
 		if (activities.length == 0) {
 			console.log('Reset Discord activity');
@@ -76,7 +104,7 @@ browser.runtime.onConnect.addListener(port => {
 			return;
 		if (port.name == "discord") {
 			if (discordPort !== undefined) {
-				discordPort.postMessage({ action: "close" });
+				sendMessageToDiscordTab({ action: "close" });
 				discordPort.disconnect();
 			}
 			discordPort = port;
@@ -101,7 +129,7 @@ browser.runtime.onConnect.addListener(port => {
 				resetActivity();
 			}
 		}
-		else if (port.name == "webStatus") {
+		else if (port.name == "webRichPresence") {
 			if (webPort == undefined)
 				webPort = port;
 			console.info("New connection from other tab");
@@ -123,7 +151,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 	console.info(request);
 	if (request.action !== undefined) {
 		switch (request.action) {
-			case "updateStatus":
+			case "updateEnabledStatus":
 				browser.storage.local.set({
 					"status": {
 						extEnabled: request.extEnabled,
@@ -142,7 +170,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 							while (activities.length > 0 && !status.enabled[activities[0].index])
 								activities.splice(0, 1);
 							if (activities.length > 0 && status.enabled[activities[0].index]) {
-								discordPort.postMessage(activities[0].activity);
+								sendMessageToDiscordTab(activities[0].activity);
 							}
 							else
 								resetActivity();
@@ -166,7 +194,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 						removeOldActivities();
 						if (activities.length > 0 && status.enabled[activities[0].index]) {
 							if (index == 0)
-								discordPort.postMessage(activities[0].activity);
+								sendMessageToDiscordTab(activities[0].activity);
 						}
 						else
 							resetActivity();
@@ -182,6 +210,26 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 				var index = activities.map(o => o.index).indexOf(request.index);
 				if (index != -1 && typeof (activities[index].lastTimeAlive) !== "undefined")
 					activities[index].lastTimeAlive = Date.now();
+				break;
+			case "updateSettings":
+				browser.storage.local.set({
+					"settings": {
+						enableJoinButton: request.enableJoinButton,
+						enableSpotifyButtons: request.enableSpotifyButtons
+					}
+				});
+				enableJoinButton = request.enableJoinButton;
+				enableSpotifyButtons = request.enableSpotifyButtons;
+				removeOldActivities();
+				if (activities.length == 0)
+					break;
+				var oldFlags = activities[0].activity.flags;
+				if (enableJoinButton)
+					activities[0].activity.flags |= ActivityFlags.Embedded;
+				else if (activities[0].activity.flags & ActivityFlags.Embedded == ActivityFlags.Embedded)
+					activities[0].activity.flags -= ActivityFlags.Embedded;
+				if (oldFlags != activities[0].activity.flags)
+					sendMessageToDiscordTab(activities[0].activity);
 				break;
 			default:
 				console.error("Unknown action", request.action);
@@ -199,7 +247,9 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 					activity: request.status,
 					lastTimeAlive: Date.now()
 				};
-				if (index != -1) 
+				if (enableJoinButton)
+					activity.activity.flags |= ActivityFlags.Embedded;
+				if (index != -1)
 					activities[index] = activity;
 				else
 					activities.push(activity);
@@ -208,8 +258,8 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 				activities.splice(index, 1);
 			removeOldActivities();
 			if (activities.length > 0 && status.enabled[activities[0].index]) {
-				if (discordPort !== undefined && activities[0].index == request.index)
-					discordPort.postMessage(activities[0].activity);
+				if (activities[0].index == request.index)
+					sendMessageToDiscordTab(activities[0].activity);
 			}
 			else
 				resetActivity();

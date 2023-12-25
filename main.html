@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DiscordWebStatus</title>
+    <title>DiscordWebRichPresence</title>
     <link rel="stylesheet" href="main.css">
 </head>
 
@@ -12,10 +12,13 @@
 
     <div class="switch-container" style="font-weight: bold;">
         <label class="switch-label">Enable rich presence</label>
-        <label class="master-switch">
-            <input type="checkbox" id="masterSwitch">
-            <span class="slider"></span>
-        </label>
+        <div class="switch-container-right">
+            <img id="settingsImg" src="img/settings.png" alt="Settings" style="display: none;">
+            <label class="master-switch">
+                <input type="checkbox" id="masterSwitch">
+                <span class="slider"></span>
+            </label>
+        </div>
     </div>
 
     <div class="separator"></div>
@@ -119,8 +122,8 @@
     <script src="main.js"></script>
     <footer>
         <div class="footer-container">
-        <button id="resetButton">Reset current presence</button>
-        <a href="https://github.com/electroHeavenVN/DiscordWebStatus/" target="_blank">View source code on Github</a>
+            <button id="resetButton">Reset current presence</button>
+            <a href="https://github.com/electroHeavenVN/DiscordWebRichPresence/" target="_blank">View source code on Github</a>
         </div>
     </footer>
 

@@ -1,28 +1,31 @@
-
 if (typeof browser === "undefined") {
     var browser = chrome;
 }
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', () => {
     const masterSwitch = document.getElementById('masterSwitch');
     const dependentSwitches = document.querySelectorAll('.dependent-switch');
     const resetButton = document.getElementById("resetButton");
+    const settingsImg = document.getElementById("settingsImg");
+
     function sendUpdate() {
         browser.runtime.sendMessage({
-            action: "updateStatus",
+            action: "updateEnabledStatus",
             extEnabled: masterSwitch.checked,
             enabled: Array.from(dependentSwitches).map(s => s.checked)
         });
     }
-    const savedMasterSwitchState = localStorage.getItem('enableWebStatus');
+
+    const savedMasterSwitchState = localStorage.getItem('enableWebRichPresence');
     if (savedMasterSwitchState !== null) {
         masterSwitch.checked = savedMasterSwitchState === 'true';
-        masterSwitch.dispatchEvent(new Event('change'));
+        if (masterSwitch.checked)
+            settingsImg.style.display = "";
     }
     dependentSwitches.forEach((dependentSwitch, index) => {
         dependentSwitch.disabled = !masterSwitch.checked;
         dependentSwitch.closest('.switch').classList.toggle('disabled', dependentSwitch.disabled);
-        dependentSwitch.addEventListener('change', function () {
+        dependentSwitch.addEventListener('change', () => {
             localStorage.setItem(`switch${index}`, dependentSwitch.checked);
             sendUpdate();
         });
@@ -31,20 +34,24 @@ document.addEventListener('DOMContentLoaded', function () {
             dependentSwitch.checked = savedDependentSwitchState === 'true';
         }
     });
-    masterSwitch.addEventListener('change', function () {
+    masterSwitch.addEventListener('change', () => {
+        if (masterSwitch.checked)
+            settingsImg.style.display = "";
+        else
+            settingsImg.style.display = "none";
         dependentSwitches.forEach(switchElem => {
             switchElem.disabled = !masterSwitch.checked;
             switchElem.closest('.switch').classList.toggle('disabled', switchElem.disabled);
         });
-        localStorage.setItem('enableWebStatus', masterSwitch.checked);
+        localStorage.setItem('enableWebRichPresence', masterSwitch.checked);
         sendUpdate();
     });
-    resetButton.addEventListener('click', function () {
+    resetButton.addEventListener('click', () => {
         browser.runtime.sendMessage({
             action: "reset"
         });
+    });
+    settingsImg.addEventListener('click', () => {
+        window.location.href = "settings.html";
     })
-    //const event = new Event('change');
-    //masterSwitch.dispatchEvent(event);
-    //sendUpdate();
 });

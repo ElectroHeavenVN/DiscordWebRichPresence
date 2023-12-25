@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DiscordWebRichPresence - Settings</title>
+<link rel="stylesheet" href="settings.css">
+</head>
+
+<body>
+    <div class="popup-header">
+        <img id="backImg" src="img/back.png" alt="Back">
+        <label class="popup-label">Settings</label>
+    </div>
+    <div class="separator"></div>
+    <div class="switch-container">
+        <label class="switch-label">Enable Join button</label>
+        <div class="switch-container-right">
+            <img id="helpImg" src="img/help.png" alt="Help" title="Show the Join button (this button will be the first button and will be disabled).">
+            <label class="switch">
+                <input type="checkbox" id="enable-join-button-switch">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+    <div class="switch-container">
+        <label class="switch-label">Enable Spotify buttons</label>
+        <div class="switch-container-right">
+            <img id="helpImg" src="img/help.png" alt="Help" title="Add custom buttons to Spotify activity, only visible on Android and IOS client">
+            <label class="switch">
+                <input type="checkbox" id="enable-spotify-buttons-switch">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+    <script src="settings.js"></script>
+</body>
+
+</html>
