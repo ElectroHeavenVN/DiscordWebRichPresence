@@ -11,8 +11,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function sendUpdate() {
         browser.runtime.sendMessage({
             action: "updateEnabledStatus",
-            extEnabled: masterSwitch.checked,
-            enabled: Array.from(dependentSwitches).map(s => s.checked)
+            enabled: masterSwitch.checked,
+            state: Array.from(dependentSwitches).map(function (s) {
+                return {
+                    id: s.id.replace('sw-', ''),
+                    enabled: s.checked
+                }
+            })
         });
     }
 
@@ -22,14 +27,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (masterSwitch.checked)
             settingsImg.style.display = "";
     }
-    dependentSwitches.forEach((dependentSwitch, index) => {
+    dependentSwitches.forEach(dependentSwitch => {
         dependentSwitch.disabled = !masterSwitch.checked;
         dependentSwitch.closest('.switch').classList.toggle('disabled', dependentSwitch.disabled);
         dependentSwitch.addEventListener('change', () => {
-            localStorage.setItem(`switch${index}`, dependentSwitch.checked);
+            localStorage.setItem(dependentSwitch.id, dependentSwitch.checked);
             sendUpdate();
         });
-        const savedDependentSwitchState = localStorage.getItem(`switch${index}`);
+        const savedDependentSwitchState = localStorage.getItem(dependentSwitch.id);
         if (savedDependentSwitchState !== null) {
             dependentSwitch.checked = savedDependentSwitchState === 'true';
         }

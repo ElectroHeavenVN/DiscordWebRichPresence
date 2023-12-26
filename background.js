@@ -86,7 +86,7 @@ function checkDisconnectedActivities() {
 			console.log('Number of activities: ' + activities.length + "\r\n", activities);
 		var oldLength = activities.length;
 		removeOldActivities();
-		if (oldLength != activities.length && activities.length > 0 && status.enabled[activities[0].index]) {
+		if (oldLength != activities.length && activities.length > 0 && status.state.find(e => e.id == activities[0].id).enabled) {
 			console.log('Send next activity to Discord');
 			sendMessageToDiscordTab(activities[0].activity);
 		}
@@ -100,7 +100,7 @@ function checkDisconnectedActivities() {
 browser.runtime.onConnect.addListener(port => {
 	browser.storage.local.get("status", status => {
 		status = status.status;
-		if (status.extEnabled == undefined || !status.extEnabled)
+		if (status.enabled == undefined || !status.enabled)
 			return;
 		if (port.name == "discord") {
 			if (discordPort !== undefined) {
@@ -115,14 +115,14 @@ browser.runtime.onConnect.addListener(port => {
 				if (webPort !== undefined) {
 					webPort.postMessage({
 						listen: false,
-						enabled: status.enabled
+						state: status.state
 					});
 				}
 			})
 			if (webPort !== undefined) {
 				webPort.postMessage({
 					listen: true,
-					enabled: status.enabled
+					state: status.state
 				});
 			}
 			else {
@@ -138,7 +138,7 @@ browser.runtime.onConnect.addListener(port => {
 			})
 			port.postMessage({
 				listen: true,
-				enabled: status.enabled
+				state: status.state
 			});
 		}
 		else {
@@ -154,45 +154,40 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 			case "updateEnabledStatus":
 				browser.storage.local.set({
 					"status": {
-						extEnabled: request.extEnabled,
-						enabled: request.enabled
+						enabled: request.enabled,
+						state: request.state
 					}
 				})
-				if (!request.extEnabled) {
+				if (!request.enabled) {
 					resetActivity();
 					activities = [];
 					break;
 				}
 				if (webPort !== undefined) {
-					if (!request.enabled[request.index]) {
-						browser.storage.local.get("status", status => {
-							status = status.status;
-							while (activities.length > 0 && !status.enabled[activities[0].index])
-								activities.splice(0, 1);
-							if (activities.length > 0 && status.enabled[activities[0].index]) {
-								sendMessageToDiscordTab(activities[0].activity);
-							}
-							else
-								resetActivity();
-						});
+					while (activities.length > 0 && !request.state.find(e => e.id == activities[0].id).enabled)
+						activities.splice(0, 1);
+					if (activities.length > 0 && request.state.find(e => e.id == activities[0].id).enabled) {
+						sendMessageToDiscordTab(activities[0].activity);
 					}
+					else
+						resetActivity();
 					webPort.postMessage({
 						listen: true,
-						enabled: request.enabled
+						state: request.state
 					});
 				}
 				else
 					resetActivity();
 				break;
 			case "reset":
-				if (request.index !== undefined) {
-					var index = activities.map(o => o.index).indexOf(request.index);
+				if (request.id !== undefined) {
+					var index = activities.map(o => o.id).indexOf(request.id);
 					if (index != -1)
 						activities.splice(index, 1);
 					browser.storage.local.get("status", status => {
 						status = status.status;
 						removeOldActivities();
-						if (activities.length > 0 && status.enabled[activities[0].index]) {
+						if (activities.length > 0 && status.state.find(e => e.id == activities[0].id).enabled) {
 							if (index == 0)
 								sendMessageToDiscordTab(activities[0].activity);
 						}
@@ -207,7 +202,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 				sendResponse();
 				break;
 			case "ping":
-				var index = activities.map(o => o.index).indexOf(request.index);
+				var index = activities.map(o => o.id).indexOf(request.id);
 				if (index != -1 && typeof (activities[index].lastTimeAlive) !== "undefined")
 					activities[index].lastTimeAlive = Date.now();
 				break;
@@ -238,12 +233,12 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 	else {
 		browser.storage.local.get("status", status => {
 			status = status.status;
-			if (status.extEnabled == undefined || !status.extEnabled)
+			if (status.enabled == undefined || !status.enabled)
 				return;
-			var index = activities.map(o => o.index).indexOf(request.index);
-			if (status.enabled[request.index]) {
+			var index = activities.map(o => o.id).indexOf(request.id);
+			if (status.state.find(e => e.id == request.id).enabled) {
 				var activity = {
-					index: request.index,
+					id: request.id,
 					activity: request.status,
 					lastTimeAlive: Date.now()
 				};
@@ -257,8 +252,8 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 			else
 				activities.splice(index, 1);
 			removeOldActivities();
-			if (activities.length > 0 && status.enabled[activities[0].index]) {
-				if (activities[0].index == request.index)
+			if (activities.length > 0 && status.state.find(e => e.id == activities[0].id).enabled) {
+				if (activities[0].id == request.id)
 					sendMessageToDiscordTab(activities[0].activity);
 			}
 			else

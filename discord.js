@@ -15,7 +15,7 @@ port.onMessage.addListener(msg => {
 		}
 	}
 	else if (msg.type !== undefined && msg.name !== undefined) {
-		document.dispatchEvent(new CustomEvent('rpc', { detail: msg }));
+		document.dispatchEvent(new CustomEvent('wrp', { detail: msg }));
 	}
 })
 port.onDisconnect.addListener(() => {

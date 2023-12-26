@@ -108,6 +108,28 @@
 				"content_script.js"
 			],
 			"run_at": "document_idle"
+		},
+		{
+			"matches": [
+				"https://aniwatch.to/*"
+			],
+			"all_frames": true,
+			"js": [
+				"aniwatch.js",
+				"content_script.js"
+			],
+			"run_at": "document_idle"
+		},
+		{
+			"matches": [
+				"https://anix.to/*"
+			],
+			"all_frames": true,
+			"js": [
+				"anix.js",
+				"content_script.js"
+			],
+			"run_at": "document_idle"
 		}
     ]
 }

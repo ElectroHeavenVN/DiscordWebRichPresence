@@ -1,4 +1,4 @@
-const index = 2;
+const id = 'soundcloud';
 const appId = "890343617762304070"; //Official SoundCloud Discord application
 var lastPlaying = false;
 var lastSong = "";
@@ -72,7 +72,7 @@ function refreshInfo()
             sentReset = false;
             setTimeout(() => {
                 browser.runtime.sendMessage({
-                    index,
+                    id,
                     status: data
                 });
             }, 10);
@@ -80,7 +80,7 @@ function refreshInfo()
             data = false;
             try {
                 browser.runtime.sendMessage({
-                    index,
+                    id,
                     action: "reset"
                 });
                 sentReset = true;

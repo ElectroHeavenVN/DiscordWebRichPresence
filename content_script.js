@@ -21,13 +21,13 @@ setTimeout(() => {
         refreshInfo();
         browser.runtime.sendMessage({
             action: "ping",
-            index,
+            id,
             alive: true
         });
     }, 3000);
 }, 1000);
 port.onMessage.addListener(msg => {
-    if (msg.enabled[index]) {
+    if (msg.state.find(e => e.id == id).enabled) {
         listening = msg.listen;
     }
 });

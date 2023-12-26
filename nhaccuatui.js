@@ -1,12 +1,11 @@
-const index = 4;
+const id = 'nhaccuatui';
 const appId = "1186960720424878132";
 var lastPlaying = false;
 var lastSong = "";
 var lastTimeStamp = 0;
 var sentReset = false;
 
-function refreshInfo()
-{
+function refreshInfo() {
 	if (listening) {
 		let playing = false,
 			title = "",
@@ -24,7 +23,10 @@ function refreshInfo()
 			songLink = document.head.querySelector('meta[property="og:url"]').content;
 			songAuthors = document.querySelector("#box_playing_id > div.info_name_songmv.playerwapper-song > div.name_title > h2").innerText;
 			artworkLink = document.querySelector("#coverImageflashPlayer").style.backgroundImage;
-			artworkLink = artworkLink.substring(5, artworkLink.length - 2);
+			if (artworkLink === "")
+				artworkLink = 'https://stc-id.nixcdn.com/v11/html5/nct-player-mp3/images/default_inner_player_80.png';
+			else
+				artworkLink = artworkLink.substring(5, artworkLink.length - 2);
 		}
 		if (lastPlaying !== playing || lastSong !== title || Math.abs(Date.now() - lastTimeStamp - elapsed) >= 1000) {
 			lastPlaying = playing;
@@ -47,7 +49,7 @@ function refreshInfo()
 				sentReset = false;
 				setTimeout(() => {
 					browser.runtime.sendMessage({
-						index,
+						id,
 						status: data
 					});
 				}, 10);
@@ -55,7 +57,7 @@ function refreshInfo()
 				data = false;
 				try {
 					browser.runtime.sendMessage({
-						index,
+						id,
 						action: "reset"
 					});
 					sentReset = true;

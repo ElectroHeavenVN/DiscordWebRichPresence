@@ -1,4 +1,4 @@
-const index = 0;
+const id = 'youtube';
 const appId = "847682519214456862" //From https://github.com/XFG16/YouTubeDiscordPresence
 var lastPlaying = false;
 var lastTitle = "";
@@ -69,7 +69,7 @@ function refreshInfo() {
             sentReset = false;
             setTimeout(() => {
                 browser.runtime.sendMessage({
-                    index,
+                    id,
                     status: data
                 });
             }, 10);
@@ -77,7 +77,7 @@ function refreshInfo() {
             data = false;
             try {
                 browser.runtime.sendMessage({
-                    index,
+                    id,
                     action: "reset"
                 });
                 sentReset = true;

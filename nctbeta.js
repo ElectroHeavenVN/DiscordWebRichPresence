@@ -1,4 +1,4 @@
-const index = 4;
+const id = 'nhaccuatui';
 const appId = "1186960720424878132";
 var lastPlaying = false;
 var lastSong = "";
@@ -49,7 +49,7 @@ function refreshInfo()
                 sentReset = false;
                 setTimeout(() => {
                     browser.runtime.sendMessage({
-                        index,
+                        id,
                         status: data
                     });
                 }, 10);
@@ -57,7 +57,7 @@ function refreshInfo()
                 data = false;
                 try {
                     browser.runtime.sendMessage({
-                        index,
+                        id,
                         action: "reset"
                     });
                     sentReset = true;

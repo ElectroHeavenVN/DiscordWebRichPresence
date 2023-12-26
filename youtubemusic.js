@@ -1,4 +1,4 @@
-const index = 1;
+const id = 'youtubemusic';
 const appId = "463151177836658699" //From https://github.com/PreMiD/Presences/tree/main/websites/Y/YouTube%20Music
 var lastPlaying = false;
 var lastTitle = "";
@@ -51,7 +51,7 @@ function refreshInfo()
                 sentReset = false;
                 setTimeout(() => {
                     browser.runtime.sendMessage({
-                        index,
+                        id,
                         status: data
                     });
                 }, 10);
@@ -59,7 +59,7 @@ function refreshInfo()
                 data = false;
                 try {
                     browser.runtime.sendMessage({
-                        index,
+                        id,
                         action: "reset"
                     });
                     sentReset = true;

@@ -90,7 +90,7 @@ window.WebSocket.OPEN = originalWebSocket.OPEN;
 window.WebSocket.CLOSING = originalWebSocket.CLOSING;
 window.WebSocket.CLOSED = originalWebSocket.CLOSED;
 
-document.addEventListener('rpc', function (msg) {
+document.addEventListener('wrp', function (msg) {
     SetDiscordActivityData(msg.detail);
 });
 
@@ -176,7 +176,7 @@ async function GetActivities(currActivities) {
         };
     let links = [];
     if (typeof (discordActivityData.largeImage) === "string" && discordActivityData.largeImage !== null && discordActivityData.largeImage.length > 0) {
-        if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/attachments\//.test(discordActivityData.largeImage))
+        if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/(attachments|app-icons)\//.test(discordActivityData.largeImage))
             activity.assets.large_image = "mp:" + discordActivityData.largeImage.replace(/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");
         else if (lastLargeImage === discordActivityData.largeImage)
             activity.assets.large_image = lastLargeMpImage;

@@ -1,4 +1,4 @@
-const index = 3;
+const id = 'zingmp3';
 const appId = "1163025400469934161";
 var lastPlaying = false;
 var lastSong = "";
@@ -46,7 +46,7 @@ function refreshInfo()
                 sentReset = false;
                 setTimeout(() => {
                     browser.runtime.sendMessage({
-                        index,
+                        id,
                         status: data
                     });
                 }, 10);
@@ -54,7 +54,7 @@ function refreshInfo()
                 data = false;
                 try {
                     browser.runtime.sendMessage({
-                        index,
+                        id,
                         action: "reset"
                     });
                     sentReset = true;

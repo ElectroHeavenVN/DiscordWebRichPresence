@@ -1,5 +1,5 @@
-const id = 'aniwave';
-const appId = "1187046060120621157";
+const id = 'anix';
+const appId = "1189179106928107593";
 var lastPlaying = false;
 var lastTitle = "";
 var lastEp = "";
@@ -14,10 +14,10 @@ function refreshInfo() {
         currentState = "",
         cover = "";
     if (listening) {
-        if (location.pathname.includes("/watch/")) {
+        if (location.pathname.includes("/anime/")) {
             playing = document.querySelector("#player > iframe") != null;
-            title = document.querySelector("#w-info > div.binfo > div.info > h1").innerText;
-            var eps = document.querySelector("#w-episodes > div.body > div").children;
+            title = document.querySelector("#ani-detail-info > div.ani-data > div.maindata > h1").innerText;
+            var eps = document.querySelector("#ani-episode > div.range-wrap").children;
             var epsRange = null;
             for (var key in eps) {
                 if (Object.hasOwnProperty.call(eps, key)) {
@@ -31,32 +31,27 @@ function refreshInfo() {
                 for (var element in epsRange) {
                     if (Object.hasOwnProperty.call(epsRange, element)) {
                         var episode = epsRange[element];
-                        if (episode.children[0].className.startsWith("active")) {
-                            currentEp = "Episode " + episode.children[0].getAttribute("data-num");
-                            if (episode.children[0].children.length > 1)
-                                currentState = episode.children[0].children[1].innerText;
-                            link = episode.children[0].href;
-                            break;
-                        }
+                    if (episode.children[0].className === "active") {
+                        currentEp = "Episode " + episode.children[0].getAttribute("data-num");
+                        currentState = episode.children[0].title;
+                        link = episode.children[0].href;
+                        break;
                     }
                 }
-            var seasons = document.querySelector("#w-seasons");
+            }
+            var seasons = document.querySelector("div.ani-season-body.swiper.swiper-container.swiper-container-initialized.swiper-container-horizontal > div");
             if (seasons != null) {
-                for (var element in seasons.children[0].children) {
-                    if (!Object.hasOwnProperty.call(seasons.children[0].children, element))
+                for (var element in seasons.children) {
+                    if (!Object.hasOwnProperty.call(seasons.children, element))
                         continue;
-                    var season = seasons.children[0].children[element];
+                    var season = seasons.children[element];
                     if (season.className.includes(' active ')) {
                         currentEp = season.innerText.replace('SEASON', 'Season') + ", " + currentEp;
                         break;
                     }
                 }
             }
-            cover = document.querySelector("#w-info > div.binfo > div.poster > span > img").src;
-        }
-        if (currentState === "") {
-            currentState = currentEp;
-            currentEp = "";
+            cover = document.querySelector("div.poster-wrap > div > span > img").src;
         }
     }
     if (lastPlaying !== playing || lastTitle !== title || lastEp !== currentEp || lastState !== currentState) {
@@ -69,17 +64,17 @@ function refreshInfo() {
                 applicationId: appId,
                 dontSave: true,
                 type: ActivityType.Watching,
-                name: "AniWave",
+                name: "Anix",
                 details: title,
                 state: currentState,
                 timeStart: Date.now(),
                 largeImage: cover,
                 largeText: currentEp,
-                smallImage: 'https://cdn.discordapp.com/app-icons/1187046060120621157/50eaca32405aec391cc2f8ce8769fb62.png',
-                smallText: 'AniWave',
-                button1Text: "Watch on AniWave",
+                smallImage: 'https://cdn.discordapp.com/app-icons/1189179106928107593/1ae6280da0813a5d9e8055e3b5417edd.png',
+                smallText: 'Anix',
+                button1Text: "Watch on Anix",
                 button1Url: link,
-                button2Text: "Official AniWave site",
+                button2Text: "Official Anix site",
                 button2Url: window.location.origin,
             };
             sentReset = false;
