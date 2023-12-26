@@ -70,7 +70,7 @@ function refreshInfo() {
                 timeStart: Date.now(),
                 largeImage: cover,
                 largeText: currentEp,
-                smallImage: 'https://cdn.discordapp.com/app-icons/1189179106928107593/1ae6280da0813a5d9e8055e3b5417edd.png',
+                smallImage: 'https://cdn.discordapp.com/app-icons/1189179106928107593/e669d08fd31ac08caf7cf47749b91e4d.png',
                 smallText: 'Anix',
                 button1Text: "Watch on Anix",
                 button1Url: link,

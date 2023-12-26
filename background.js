@@ -221,7 +221,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 				var oldFlags = activities[0].activity.flags;
 				if (enableJoinButton)
 					activities[0].activity.flags |= ActivityFlags.Embedded;
-				else if (activities[0].activity.flags & ActivityFlags.Embedded == ActivityFlags.Embedded)
+				else if ((activities[0].activity.flags & ActivityFlags.Embedded) == ActivityFlags.Embedded)
 					activities[0].activity.flags -= ActivityFlags.Embedded;
 				if (oldFlags != activities[0].activity.flags)
 					sendMessageToDiscordTab(activities[0].activity);

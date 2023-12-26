@@ -37,8 +37,12 @@ function refreshInfo()
         songAuthor = "",
         songAuthorLink = "",
         artworkLink = "";
-    let elapsed = convertTimeToTimestamp(document.querySelector("div.playbackTimeline__timePassed > span:nth-child(2)").innerText);
-    let total = convertTimeToTimestamp(document.querySelector("div.playbackTimeline__duration > span:nth-child(2)").innerText);
+    var elapsed = convertTimeToTimestamp(document.querySelector("div.playbackTimeline__timePassed > span:nth-child(2)").innerText);
+    var totalText = document.querySelector("div.playbackTimeline__duration > span:nth-child(2)").innerText;
+    if (totalText.startsWith('-'))
+        var total = elapsed + convertTimeToTimestamp(totalText.replace('-', ''));
+    else 
+        var total = convertTimeToTimestamp(totalText);
     if (document.querySelector(".playControls__play") != null) {
         playing = document.querySelector(".playControls__play").classList.contains("playing");
     }
