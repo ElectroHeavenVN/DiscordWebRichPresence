@@ -39,7 +39,7 @@
 			"matches": ["https://soundcloud.com/*"],
 			"all_frames": true,
 			"js": [
-				"soundcloud.js",
+				"web/soundcloud.js",
 				"content_script.js"
 			],
 			"run_at": "document_idle"
@@ -48,7 +48,7 @@
 			"matches": ["https://www.youtube.com/*"],
 			"all_frames": true,
 			"js": [
-				"youtube.js",
+				"web/youtube.js",
 				"content_script.js"
 			],
 			"run_at": "document_idle"
@@ -57,7 +57,7 @@
 			"matches": ["https://music.youtube.com/*"],
 			"all_frames": true,
 			"js": [
-				"youtubemusic.js",
+				"web/youtubemusic.js",
 				"content_script.js"
 			],
 			"run_at": "document_idle"
@@ -68,7 +68,7 @@
 			],
 			"all_frames": true,
 			"js": [
-				"zingmp3.js",
+				"web/zingmp3.js",
 				"content_script.js"
 			],
 			"run_at": "document_idle"
@@ -79,7 +79,7 @@
 			],
 			"all_frames": true,
 			"js": [
-				"nhaccuatui.js",
+				"web/nhaccuatui.js",
 				"content_script.js"
 			],
 			"run_at": "document_idle"
@@ -90,7 +90,7 @@
 			],
 			"all_frames": true,
 			"js": [
-				"nctbeta.js",
+				"web/nctbeta.js",
 				"content_script.js"
 			],
 			"run_at": "document_idle"
@@ -104,7 +104,7 @@
 			],
 			"all_frames": true,
 			"js": [
-				"aniwave.js",
+				"web/aniwave.js",
 				"content_script.js"
 			],
 			"run_at": "document_idle"
@@ -115,7 +115,7 @@
 			],
 			"all_frames": true,
 			"js": [
-				"aniwatch.js",
+				"web/aniwatch.js",
 				"content_script.js"
 			],
 			"run_at": "document_idle"
@@ -126,7 +126,7 @@
 			],
 			"all_frames": true,
 			"js": [
-				"anix.js",
+				"web/anix.js",
 				"content_script.js"
 			],
 			"run_at": "document_idle"
