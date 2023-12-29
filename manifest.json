@@ -45,6 +45,17 @@
 			"run_at": "document_idle"
 		},
 		{
+			"matches": [
+				"https://open.spotify.com/*"
+			],
+			"all_frames": true,
+			"js": [
+				"web/spotify.js",
+				"content_script.js"
+			],
+			"run_at": "document_idle"
+		},
+		{
 			"matches": ["https://www.youtube.com/*"],
 			"all_frames": true,
 			"js": [

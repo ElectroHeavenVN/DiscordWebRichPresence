@@ -32,6 +32,8 @@ body {
     order: 1;
     margin-right: 10px;
     font-size: 17px;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .master-switch,
@@ -170,8 +172,19 @@ input:checked:disabled+.slider:before,
 
 .switch-container-right {
     order: 2;
+    width: 70px;
+    height: auto;
+    display: flex; 
+    justify-content: flex-end;
 }
 
-.switch-container-right img{
+.switch-container-right img {
     padding-right: 5px;
+}
+
+#helpImg {
+    order: 2;
+    width: 20px;
+    height: 20px;
+    vertical-align: top;
 }

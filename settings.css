@@ -1,9 +1,12 @@
 body {
     overflow: hidden;
     width: 250px;
-    height: 300px;
+    height: auto;
     margin: 0;
-    padding: 20px;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 20px;
+    padding-bottom: 10px;
     background-color: #000;
     font-family: 'Roboto', sans-serif;
     color: #fff;
@@ -29,6 +32,8 @@ body {
     order: 1;
     margin-right: 10px;
     font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .switch {
@@ -147,6 +152,10 @@ input:checked:disabled+.slider:before,
 
 .switch-container-right {
     order: 2;
+    width: 70px;
+    height: auto;
+    display: flex; 
+    justify-content: flex-end;
 }
 
 .switch-container-right img {

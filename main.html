@@ -9,7 +9,6 @@
 </head>
 
 <body>
-
     <div class="switch-container" style="font-weight: bold;">
         <label class="switch-label">Enable rich presence</label>
         <div class="switch-container-right">
@@ -73,7 +72,27 @@
 
     <div class="switch-container">
         <label class="switch-label">
-            <a href="https://zingmp3.png/" target="_blank"
+            <a href="https://open.spotify.com/" target="_blank"
+                style="text-decoration: none; :hover{ text-decoration: none }">
+                <img src="img/spotify.png" alt="Spotify">
+            </a>
+            <a href="https://open.spotify.com/" target="_blank">
+                Spotify
+            </a>
+        </label>
+        <div class="switch-container-right">
+            <img id="helpImg" src="img/help.png" alt="Help"
+                title="Show your Spotify activity without Discord integration (listen along feature won't work).">
+            <label class="switch">
+                <input type="checkbox" class="dependent-switch" id="sw-spotify" disabled>
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <div class="switch-container">
+        <label class="switch-label">
+            <a href="https://zingmp3.vn/" target="_blank"
                 style="text-decoration: none; :hover{ text-decoration: none }">
                 <img src="img/zingmp3.png" alt="Zing MP3">
             </a>
@@ -81,10 +100,13 @@
                 Zing MP3
             </a>
         </label>
-        <label class="switch">
-            <input type="checkbox" class="dependent-switch" id="sw-zingmp3" disabled>
-            <span class="slider"></span>
-        </label>
+        <div class="switch-container-right">
+            <img id="helpImg" src="img/help.png" alt="Help" title="" hidden>
+            <label class="switch">
+                <input type="checkbox" class="dependent-switch" id="sw-zingmp3" disabled>
+                <span class="slider"></span>
+            </label>
+        </div>
     </div>
 
     <div class="switch-container">
@@ -97,10 +119,13 @@
                 NhacCuaTui
             </a>
         </label>
-        <label class="switch">
-            <input type="checkbox" class="dependent-switch" id="sw-nhaccuatui" disabled>
-            <span class="slider"></span>
-        </label>
+        <div class="switch-container-right">
+            <img id="helpImg" src="img/help.png" alt="Help" title="" hidden>
+            <label class="switch">
+                <input type="checkbox" class="dependent-switch" id="sw-nhaccuatui" disabled>
+                <span class="slider"></span>
+            </label>
+        </div>
     </div>
 
     <div class="switch-container">
@@ -113,10 +138,13 @@
                 AniWave
             </a>
         </label>
-        <label class="switch">
-            <input type="checkbox" class="dependent-switch" id="sw-aniwave" disabled>
-            <span class="slider"></span>
-        </label>
+        <div class="switch-container-right">
+            <img id="helpImg" src="img/help.png" alt="Help" title="" hidden>
+            <label class="switch">
+                <input type="checkbox" class="dependent-switch" id="sw-aniwave" disabled>
+                <span class="slider"></span>
+            </label>
+        </div>
     </div>
 
     <div class="switch-container">
@@ -129,33 +157,39 @@
                 AniWatch
             </a>
         </label>
-        <label class="switch">
-            <input type="checkbox" class="dependent-switch" id="sw-aniwatch" disabled>
-            <span class="slider"></span>
-        </label>
+        <div class="switch-container-right">
+            <img id="helpImg" src="img/help.png" alt="Help" title="" hidden>
+            <label class="switch">
+                <input type="checkbox" class="dependent-switch" id="sw-aniwatch" disabled>
+                <span class="slider"></span>
+            </label>
+        </div>
     </div>
 
     <div class="switch-container">
         <label class="switch-label">
-            <a href="https://anix.to/" target="_blank"
-                style="text-decoration: none; :hover{ text-decoration: none }">
+            <a href="https://anix.to/" target="_blank" style="text-decoration: none; :hover{ text-decoration: none }">
                 <img src="img/anix.png" alt="Anix">
             </a>
             <a href="https://anix.to/" target="_blank">
                 Anix
             </a>
         </label>
-        <label class="switch">
-            <input type="checkbox" class="dependent-switch" id="sw-anix" disabled>
-            <span class="slider"></span>
-        </label>
+        <div class="switch-container-right">
+            <img id="helpImg" src="img/help.png" alt="Help" title="" hidden>
+            <label class="switch">
+                <input type="checkbox" class="dependent-switch" id="sw-anix" disabled>
+                <span class="slider"></span>
+            </label>
+        </div>
     </div>
 
     <script src="main.js"></script>
     <footer>
         <div class="footer-container">
             <button id="resetButton">Reset current presence</button>
-            <a href="https://github.com/electroHeavenVN/DiscordWebRichPresence/" target="_blank">View source code on Github</a>
+            <a href="https://github.com/electroHeavenVN/DiscordWebRichPresence/" target="_blank">View source code on
+                Github</a>
         </div>
     </footer>
 

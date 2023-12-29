@@ -129,7 +129,7 @@ function SendDiscordActivity() {
 }
 
 async function GetActivities(currActivities) {
-    if (typeof (discordActivityData.applicationId) !== "string" || discordActivityData.applicationId === null || discordActivityData.applicationId.length === 0 || discordActivityData.applicationId === "0")
+    if ((typeof (discordActivityData.applicationId) !== "string" || discordActivityData.applicationId === null || discordActivityData.applicationId.length === 0 || discordActivityData.applicationId === "0") && discordActivityData.name !== "Spotify")
         return currActivities;
     let activity = {
         application_id: discordActivityData.applicationId,
@@ -174,9 +174,28 @@ async function GetActivities(currActivities) {
                 discordActivityData.partyMax.toString()
             ]
         };
+
+    if (discordActivityData.name == "Spotify") {
+        if (typeof (discordActivityData.contextUri) === "string" && discordActivityData.contextUri !== null && discordActivityData.contextUri.length > 0)
+            activity.metadata.context_uri = discordActivityData.contextUri;
+        if (typeof (discordActivityData.albumID) === "string" && discordActivityData.albumID !== null && discordActivityData.contextUri.length > 0)
+            activity.metadata.album_id = discordActivityData.albumID;
+        if (typeof (discordActivityData.artistIDs) === "object" && discordActivityData.artistIDs !== null && discordActivityData.artistIDs.length > 0)
+            activity.metadata.artist_ids = discordActivityData.artistIDs;
+        if (typeof (activity.party) !== 'undefined')
+            activity.party.id = 'spotify:000000000000000000';
+        else
+            activity.party = {
+                id: 'spotify:000000000000000000'
+            };
+        activity.sync_id = "0000000000000000000000";
+    }
+
     let links = [];
     if (typeof (discordActivityData.largeImage) === "string" && discordActivityData.largeImage !== null && discordActivityData.largeImage.length > 0) {
-        if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/(attachments|app-icons)\//.test(discordActivityData.largeImage))
+        if (discordActivityData.largeImage.startsWith('spotify:'))
+            activity.assets.large_image = discordActivityData.largeImage;
+        else if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/(attachments|app-icons)\//.test(discordActivityData.largeImage))
             activity.assets.large_image = "mp:" + discordActivityData.largeImage.replace(/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");
         else if (lastLargeImage === discordActivityData.largeImage)
             activity.assets.large_image = lastLargeMpImage;
@@ -185,7 +204,9 @@ async function GetActivities(currActivities) {
         lastLargeImage = discordActivityData.largeImage;
     }
     if (typeof (discordActivityData.smallImage) === "string" && discordActivityData.smallImage !== null && discordActivityData.smallImage.length > 0) {
-        if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/attachments\//.test(discordActivityData.smallImage))
+        if (discordActivityData.smallImage.startsWith('spotify:'))
+            activity.assets.small_image = discordActivityData.smallImage;
+        else if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/attachments\//.test(discordActivityData.smallImage))
             activity.assets.small_image = "mp:" + discordActivityData.smallImage.replace(/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");
         else if (lastSmallImage === discordActivityData.smallImage)
             activity.assets.small_image = lastSmallMpImage;
@@ -255,6 +276,11 @@ function SetDiscordActivityData(msg) {
             button1Url: msg.button1Url,
             button2Text: msg.button2Text,
             button2Url: msg.button2Url,
+        }
+        if (msg.name == "Spotify") {
+            discordActivityData.contextUri = msg.contextUri;
+            discordActivityData.albumID = msg.albumID;
+            discordActivityData.artistIDs = msg.artistIDs;
         }
         SendDiscordActivity();
     }
