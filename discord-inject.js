@@ -1,7 +1,7 @@
 var st = "online";
 var since = 0;
 var afk = false;
-var currentActivities = [];
+var otherActivities = [];
 var lastLargeImage = "";
 var lastSmallImage = "";
 var lastLargeMpImage = "";
@@ -9,6 +9,7 @@ var lastSmallMpImage = "";
 var discordGateway;
 var activityQueue = [];
 var sendingActivity;
+var currentActivities;
 
 var discordActivityData = {
     type: 0,
@@ -38,7 +39,7 @@ window.WebSocket = function (u, p) {
     this.downstreamSocket = new originalWebSocket(u, p);
     var newGateway = false;
     if (/gateway.*\.discord.gg/.test(u)) {
-        newGateway = discordGateway != undefined;
+        newGateway = typeof (discordGateway) !== "undefined" && discordGateway !== null;
         discordGateway = this.downstreamSocket;
     }
     for (let i in originalWebSocketProperties) {
@@ -57,28 +58,24 @@ window.WebSocket = function (u, p) {
 window.WebSocket.prototype.send = function (d) {
     var cancelSend = false;
     if (this.downstreamSocket === discordGateway) {
-        const start = d.substr(0, 8);
-        if (start === '{"op":3,') {
+        if (d.substr(0, 8) === '{"op":3,') {
             const j = JSON.parse(d);
             st = j.d.status;
             since = j.d.since;
             afk = j.d.afk;
-            if (JSON.stringify(currentActivities.toString()) != JSON.stringify(j.d.activities.toString())) {
+            if (JSON.stringify(currentActivities.concat(otherActivities)) != JSON.stringify(j.d.activities)) {
                 cancelSend = true;
-                GetActivities(j.d.activities).then(activities => {
+                otherActivities = j.d.activities;
+                GetActivities([]).then(activities => {
                     j.d.activities = activities;
-                    currentActivities = j.d.activities;
                     d = JSON.stringify(j);
-                    this.downstreamSocket.send(d);
+                    send(this.downstreamSocket, d);
                 });
-            }
-            else {
-                currentActivities = j.d.activities;
             }
         }
     }
     if (!cancelSend)
-        this.downstreamSocket.send(d);
+        send(this.downstreamSocket, d);
 };
 
 window.WebSocket.prototype.close = function (c, r) {
@@ -94,6 +91,23 @@ document.addEventListener('wrp', function (msg) {
     SetDiscordActivityData(msg.detail);
 });
 
+function send(downstreamSocket, data) {
+    var cancelSend = false;
+    if (downstreamSocket === discordGateway) {
+        if (data.substr(0, 8) === '{"op":3,') {
+            cancelSend = true;
+            const j = JSON.parse(data);
+            currentActivities = j.d.activities;
+            if (otherActivities.length > 0)
+                j.d.activities = j.d.activities.concat(otherActivities);
+            data = JSON.stringify(j);
+            downstreamSocket.send(data);
+        }
+    }
+    if (!cancelSend)
+        downstreamSocket.send(data);
+}
+
 function SendDiscordActivity() {
     if (discordGateway && discordGateway.readyState == originalWebSocket.OPEN) {
         GetActivities([]).then(activities => {
@@ -107,7 +121,7 @@ function SendDiscordActivity() {
                 }
             };
             if (activityQueue.length == 0) {
-                discordGateway.send(JSON.stringify(activity));
+                send(discordGateway, JSON.stringify(activity));
                 setTimeout(() => {
                     if (activityQueue.length == 1) {
                         activityQueue = [];
@@ -118,7 +132,7 @@ function SendDiscordActivity() {
                 if (!sendingActivity)
                     setTimeout(() => {
                         sendingActivity = true;
-                        discordGateway.send(JSON.stringify(activityQueue[activityQueue.length - 1]));
+                        send(discordGateway, JSON.stringify(activityQueue[activityQueue.length - 1]));
                         activityQueue = [];
                         sendingActivity = false;
                     }, 5000);
@@ -236,7 +250,7 @@ async function GetActivities(currActivities) {
         }
     }
     var currActivitiesCopy = currActivities.map(o => ({ ...o }));
-    currActivitiesCopy.push(activity);
+    currActivitiesCopy.unshift(activity);
     return currActivitiesCopy;
 }
 
