@@ -109,37 +109,38 @@ function send(downstreamSocket, data) {
 }
 
 function SendDiscordActivity() {
-    if (discordGateway && discordGateway.readyState == originalWebSocket.OPEN) {
-        GetActivities([]).then(activities => {
-            var activity = {
-                op: 3,
-                d: {
-                    status: st,
-                    activities: activities,
-                    since,
-                    afk,
-                }
-            };
-            if (activityQueue.length == 0) {
+    GetActivities([]).then(activities => {
+        var activity = {
+            op: 3,
+            d: {
+                status: st,
+                activities: activities,
+                since,
+                afk,
+            }
+        };
+        if (activityQueue.length == 0) {
+            if (discordGateway && discordGateway.readyState == originalWebSocket.OPEN)
                 send(discordGateway, JSON.stringify(activity));
+            setTimeout(() => {
+                if (activityQueue.length == 1) {
+                    activityQueue = [];
+                }
+            }, 5000);
+        }
+        else {
+            if (!sendingActivity) {
+                sendingActivity = true;
                 setTimeout(() => {
-                    if (activityQueue.length == 1) {
-                        activityQueue = [];
-                    }
+                    if (discordGateway && discordGateway.readyState == originalWebSocket.OPEN)
+                        send(discordGateway, JSON.stringify(activityQueue[activityQueue.length - 1]));
+                    activityQueue = [];
+                    sendingActivity = false;
                 }, 5000);
             }
-            else {
-                if (!sendingActivity)
-                    setTimeout(() => {
-                        sendingActivity = true;
-                        send(discordGateway, JSON.stringify(activityQueue[activityQueue.length - 1]));
-                        activityQueue = [];
-                        sendingActivity = false;
-                    }, 5000);
-            }
-            activityQueue.push(activity);
-        });
-    }
+        }
+        activityQueue.push(activity);
+    });
 }
 
 async function GetActivities(currActivities) {
