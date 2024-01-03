@@ -45,7 +45,7 @@ function refreshInfo() {
                     if (!Object.hasOwnProperty.call(seasons.children[0].children, element))
                         continue;
                     var season = seasons.children[0].children[element];
-                    if (season.className.endsWith('-active')) {
+                    if (season.children[0].className.endsWith(' active')) {
                         currentEp = season.children[0].children[1].children[0].innerText.replace('SEASON', 'Season') + ", " + currentEp;
                         break;
                     }
