@@ -122,6 +122,20 @@
 		},
 		{
 			"matches": [
+				"https://lite.aniwave.to/*",
+				"https://lite.aniwave.ws/*",
+				"https://lite.aniwave.vc/*",
+				"https://lite.aniwave.li/*"
+			],
+			"all_frames": true,
+			"js": [
+				"web/aniwavelite.js",
+				"content_script.js"
+			],
+			"run_at": "document_idle"
+		},
+		{
+			"matches": [
 				"https://aniwatch.to/*"
 			],
 			"all_frames": true,
