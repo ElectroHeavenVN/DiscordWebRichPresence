@@ -201,25 +201,25 @@ input:checked:disabled+.slider:before,
 
 ::-webkit-scrollbar {
     width: 8px;
-    height: .6rem
+    height: .6rem;
 }
 
 ::-webkit-scrollbar-track {
     background: #23272a;
-    border: none
+    border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb {
     transition: background .15s ease-out;
     border: 3px solid #23272a;
     border-radius: 20px;
-    background: #515b62
+    background: #515b62;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #5d6870
+    background: #5d6870;
 }
 
 ::-webkit-scrollbar-corner {
-    background: transparent
+    background: transparent;
 }
