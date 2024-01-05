@@ -24,6 +24,10 @@ body {
     margin-bottom: 15px;
 }
 
+.switch-container:last-child {
+    margin-bottom: 0px;
+}
+
 .switch-label a {
     color: #00a8fc;
     text-decoration: none;
