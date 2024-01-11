@@ -5,7 +5,6 @@ if (typeof browser === "undefined") {
 }
 var activities = [];
 var enableJoinButton;
-var enableSpotifyButtons;
 
 const ActivityFlags = {
 	Instance: 1 << 0,
@@ -29,7 +28,6 @@ setInterval(checkDisconnectedActivities, 5000);
 browser.storage.local.get("settings", settings => {
 	settings = settings.settings;
 	enableJoinButton = settings.enableJoinButton;
-	enableSpotifyButtons = settings.enableSpotifyButtons;
 });
 
 function sendMessageToDiscordTab(message) {
@@ -41,6 +39,7 @@ function sendMessageToDiscordTab(message) {
 
 function resetActivity() {
 	if (discordPort !== undefined) {
+		activities = [];
 		sendMessageToDiscordTab({
 			type: 0,
 			flags: ActivityFlags.Instance,
@@ -210,11 +209,9 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 				browser.storage.local.set({
 					"settings": {
 						enableJoinButton: request.enableJoinButton,
-						enableSpotifyButtons: request.enableSpotifyButtons
 					}
 				});
 				enableJoinButton = request.enableJoinButton;
-				enableSpotifyButtons = request.enableSpotifyButtons;
 				removeOldActivities();
 				if (activities.length == 0)
 					break;
@@ -225,6 +222,17 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 					activities[0].activity.flags -= ActivityFlags.Embedded;
 				if (oldFlags != activities[0].activity.flags)
 					sendMessageToDiscordTab(activities[0].activity);
+				break;
+			case 'getCurrentPresence':
+				var data = null;
+				if (activities.length > 0)
+					data = activities[0].activity;
+				browser.runtime.sendMessage({
+					action: 'currentPresence',
+					data: data
+				});
+				break;
+			case 'currentPresence':
 				break;
 			default:
 				console.error("Unknown action", request.action);

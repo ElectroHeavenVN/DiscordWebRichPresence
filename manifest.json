@@ -32,7 +32,7 @@
 				"https://canary.discord.com/channels/*"
 			],
 			"all_frames": true,
-			"js": ["discord-inject.js"],
+			"js": ["discord-main-world.js"],
 			"run_at": "document_start"
 		},
 		{
