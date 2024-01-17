@@ -29,7 +29,7 @@ function sendUpdate() {
     browser.runtime.sendMessage({
         action: "updateEnabledStatus",
         enabled: masterSwitch.checked,
-        state: Array.from(dependentSwitches).map(function (s) {
+        state: Array.from(document.querySelectorAll('.dependent-switch')).map(function (s) {
             return {
                 id: s.id.replace('sw-', ''),
                 enabled: s.checked
