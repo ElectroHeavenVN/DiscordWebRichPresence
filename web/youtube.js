@@ -36,6 +36,7 @@ function refreshInfo() {
     if (document.querySelector("#content > #page-manager> ytd-watch-flexy") == null)
         return;
     var videoId = document.querySelector("#content > #page-manager> ytd-watch-flexy").getAttribute("video-id");
+    var isMemberOnly = document.querySelector("#below > ytd-watch-metadata .badge-style-type-members-only") != null;
     if (lastPlaying !== playing || lastTitle !== title || channelProfilePicture !== lastchannelProfilePicture || (!isLiveStreaming && Math.abs(Date.now() - lastTimeStamp - elapsed) >= 1000)) {
         lastPlaying = playing;
         lastTitle = title;
@@ -59,6 +60,7 @@ function refreshInfo() {
                 timeEnd: timeEnd,
                 timeStart: lastTimeStamp,
                 largeImage: "https://i.ytimg.com/vi/" + videoId + "/hqdefault.jpg",
+                largeText: isMemberOnly ? "Member only" : "",
                 smallImage: channelProfilePicture,
                 smallText: document.querySelector("#upload-info > #channel-name > #container > #text-container > #text > a")?.innerText,
                 button1Text: isLiveStreaming ? "Watch livestream on YouTube" : "Watch video on YouTube",
