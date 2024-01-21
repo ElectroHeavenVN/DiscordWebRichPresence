@@ -109,9 +109,9 @@
 		{
 			"matches": [
 				"https://aniwave.to/*",
-				"https://aniwave.bz/*",
 				"https://aniwave.ws/*",
-				"https://aniwave.vc/*"
+				"https://aniwave.vc/*",
+				"https://aniwave.li/*"
 			],
 			"all_frames": true,
 			"js": [
