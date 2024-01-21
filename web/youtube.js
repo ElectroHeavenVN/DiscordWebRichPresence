@@ -7,75 +7,10 @@ var lastTimeStamp = 0;
 var sentReset = false;
 
 function refreshInfo() {
-    let playing = false,
-        title = "";
-    if (listening) {
-        if (location.pathname === "/watch" || location.pathname === "/embed/" || document.querySelector("#movie_player > div.ytp-miniplayer-ui") != null) {
-            if (document.querySelector(".html5-video-player") != null) {
-                playing = document.querySelector(".html5-video-player").classList.contains("playing-mode");
-            }
-            if (document.querySelector("#info .title") != null) {
-                title = document.querySelector("#info .title").innerText;
-            }
-        }
-    }
-    var videoPlayer = document.getElementsByTagName('video')[0];
-    if (videoPlayer == null)
-        return;
-    var isLiveStreaming = document.querySelector("#movie_player > div.ytp-chrome-bottom > div.ytp-chrome-controls > div.ytp-left-controls > div.ytp-time-display.notranslate.ytp-live > button") != null;
-    if (!isLiveStreaming) {
-        var elapsed = Math.round(videoPlayer.currentTime * 1000);
-        var total = Math.round(videoPlayer.duration * 1000);
-        if (total == NaN || elapsed == NaN)
-            return;
-    }
-    var channelProfilePicture = "";
-    var videoOwner = document.querySelector("#owner > ytd-video-owner-renderer > a");
-    if (videoOwner != null)
-        channelProfilePicture = videoOwner.querySelector("#img").src;
-    if (document.querySelector("#content > #page-manager> ytd-watch-flexy") == null)
-        return;
-    var videoId = document.querySelector("#content > #page-manager> ytd-watch-flexy").getAttribute("video-id");
-    var isMemberOnly = document.querySelector("#below > ytd-watch-metadata .badge-style-type-members-only") != null;
-    if (lastPlaying !== playing || lastTitle !== title || channelProfilePicture !== lastchannelProfilePicture || (!isLiveStreaming && Math.abs(Date.now() - lastTimeStamp - elapsed) >= 1000)) {
-        lastPlaying = playing;
-        lastTitle = title;
-        lastchannelProfilePicture = channelProfilePicture;
-        var timeEnd = 0;
-        if (!isLiveStreaming && Math.abs(Date.now() - lastTimeStamp - elapsed) >= 1000) {
-            timeEnd = Date.now() - elapsed + total;
-            lastTimeStamp = Date.now() - elapsed;
-        }
-        else {
-            lastTimeStamp = Date.now();
-        }
-        if (playing) {
-            data = {
-                applicationId: appId,
-                dontSave: true,
-                type: ActivityType.Watching,
-                name: "YouTube",
-                details: title,
-                state: "by " + document.querySelector("#upload-info > #channel-name > #container > #text-container > #text > a")?.innerText,
-                timeEnd: timeEnd,
-                timeStart: lastTimeStamp,
-                largeImage: "https://i.ytimg.com/vi/" + videoId + "/hqdefault.jpg",
-                largeText: isMemberOnly ? "Member only" : "",
-                smallImage: channelProfilePicture,
-                smallText: document.querySelector("#upload-info > #channel-name > #container > #text-container > #text > a")?.innerText,
-                button1Text: isLiveStreaming ? "Watch livestream on YouTube" : "Watch video on YouTube",
-                button1Url: "https://www.youtube.com/watch?v=" + videoId,
-                button2Text: "View channel",
-                button2Url: document.querySelector("#upload-info > #channel-name > #container > #text-container > #text > a").href,
-            };
-            sentReset = false;
-            setTimeout(() => {
-                browser.runtime.sendMessage({
-                    id,
-                    status: data
-                });
-            }, 10);
-        } else if (!sentReset) {
+    var isYTShorts = location.pathname.includes("/shorts/");
+    if (location.pathname !== "/watch" && !location.pathname.includes("/embed/") && !isYTShorts && !sentReset) {
+        var miniPlayer = document.querySelector("#movie_player > div.ytp-miniplayer-ui");
+        if (miniPlayer == null || miniPlayer.style.display == "none") {
             data = false;
             try {
                 browser.runtime.sendMessage({
@@ -84,6 +19,91 @@ function refreshInfo() {
                 });
                 sentReset = true;
             } catch (e) { }
+            return;
         }
+    }
+    var playing = false,
+        title = "",
+        elapsed = 0,
+        total = 0,
+        channelName = "",
+        channelLink = "",
+        channelProfilePicture = "",
+        videoId = "",
+        isMemberOnly = false;
+    if (listening) {
+        if (isYTShorts)
+            var shortsVideoElement = Array.from(document.querySelector("#shorts-inner-container").querySelectorAll("ytd-reel-video-renderer")).find(r => r.hasAttribute("is-active"));
+        if (document.querySelector(".html5-video-player") != null)
+            playing = document.querySelector(".html5-video-player#" + (isYTShorts ? "shorts-player" : "movie_player")).classList.contains("playing-mode");
+        if (isYTShorts && shortsVideoElement != null)
+            title = shortsVideoElement.querySelector("ytd-reel-player-header-renderer > h2").innerText;
+        else if (document.querySelector("#info .title") != null)
+            title = document.querySelector("#info .title").innerText;
+        var isLiveStreaming = document.querySelector("#movie_player > div.ytp-chrome-bottom > div.ytp-chrome-controls > div.ytp-left-controls > div.ytp-time-display.notranslate.ytp-live > button") != null;
+        var videoPlayer = document.querySelector(".html5-video-player#" + (isYTShorts ? "shorts-player" : "movie_player") + " video");
+        if (videoPlayer == null)
+            return;
+        if (!isLiveStreaming) {
+            elapsed = Math.round(videoPlayer.currentTime * 1000);
+            total = Math.round(videoPlayer.duration * 1000);
+            if (total == NaN || elapsed == NaN)
+                return;
+        }
+        var videoOwner = document.querySelector("#owner > ytd-video-owner-renderer");
+        if (isYTShorts)
+            videoOwner = shortsVideoElement.querySelector("#channel-info");
+        if (videoOwner != null) {
+            channelProfilePicture = videoOwner.querySelector("#img").src;
+            channelLink = videoOwner.querySelector("#channel-name a").href;
+            channelName = videoOwner.querySelector("#channel-name a").innerText;
+        }
+        if (isYTShorts) {
+            videoId = location.pathname.substring(location.pathname.lastIndexOf('/') + 1);
+            isMemberOnly = shortsVideoElement.querySelector("ytd-reel-player-header-renderer #badge").children.length > 0;
+        }
+        else {
+            if (document.querySelector("#content > #page-manager> ytd-watch-flexy") == null)
+                return;
+            videoId = document.querySelector("#content > #page-manager> ytd-watch-flexy").getAttribute("video-id");
+            isMemberOnly = document.querySelector("#below > ytd-watch-metadata .badge-style-type-members-only") != null;
+        }
+    }
+    if (lastPlaying !== playing || lastTitle !== title || channelProfilePicture !== lastchannelProfilePicture || (!isLiveStreaming && playing && Math.abs(Date.now() - lastTimeStamp - elapsed) >= 1000)) {
+        sentReset = false;
+        lastPlaying = playing;
+        lastTitle = title;
+        lastchannelProfilePicture = channelProfilePicture;
+        var timeEnd = 0;
+        if (!isLiveStreaming && Math.abs(Date.now() - lastTimeStamp - elapsed) >= 1000 && playing) {
+            timeEnd = Date.now() - elapsed + total;
+            lastTimeStamp = Date.now() - elapsed;
+        }
+        else
+            lastTimeStamp = Date.now();
+        data = {
+            applicationId: appId,
+            dontSave: true,
+            type: ActivityType.Watching,
+            name: "YouTube" + (isYTShorts ? " Shorts" : ""),
+            details: title,
+            state: "by " + channelName,
+            timeEnd: timeEnd,
+            timeStart: lastTimeStamp,
+            largeImage: "https://i.ytimg.com/vi/" + videoId + "/hqdefault.jpg",
+            largeText: playing ? (isMemberOnly ? "Member only" : "") : "Paused",
+            smallImage: channelProfilePicture,
+            smallText: channelName,
+            button1Text: isLiveStreaming ? "Watch livestream on YouTube" : "Watch video on YouTube" + (isYTShorts ? " Shorts" : ""),
+            button1Url: "https://www.youtube.com/" + (isYTShorts ? "shorts/" : "watch?v=") + videoId,
+            button2Text: "View channel",
+            button2Url: channelLink,
+        };
+        setTimeout(() => {
+            browser.runtime.sendMessage({
+                id,
+                status: data
+            });
+        }, 10);
     }
 }

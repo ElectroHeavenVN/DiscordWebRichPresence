@@ -215,8 +215,8 @@ document.addEventListener('DOMContentLoaded', () => {
         action: "getCurrentPresence"
     });
     setInterval(updateTimeBar, 500);
-    document.querySelector(".current-presence-panel .buttons > button:nth-child(1)").addEventListener('click', () => window.open(currentPresence.button1Url, '_blank'))
-    document.querySelector(".current-presence-panel .buttons > button:nth-child(2)").addEventListener('click', () => window.open(currentPresence.button2Url, '_blank'))
+    document.querySelector(".current-presence-panel .buttons > button:nth-child(2)").addEventListener('click', () => window.open(currentPresence.button1Url, '_blank'))
+    document.querySelector(".current-presence-panel .buttons > button:nth-child(3)").addEventListener('click', () => window.open(currentPresence.button2Url, '_blank'))
 });
 
 browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
