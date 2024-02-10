@@ -7,6 +7,8 @@ var lastTimeStamp = 0;
 var sentReset = false;
 
 function refreshInfo() {
+    if (location.pathname !== "/watch" && !location.pathname.includes("/embed/") && !location.pathname.includes("/shorts/") && location.pathname !== "")
+        return;
     var isYTShorts = location.pathname.includes("/shorts/");
     if (location.pathname !== "/watch" && !location.pathname.includes("/embed/") && !isYTShorts && !sentReset) {
         var miniPlayer = document.querySelector("#movie_player > div.ytp-miniplayer-ui");
