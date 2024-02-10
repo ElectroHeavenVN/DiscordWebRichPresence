@@ -7,7 +7,7 @@ var lastTimeStamp = 0;
 var sentReset = false;
 
 function refreshInfo() {
-    if (location.pathname !== "/watch" && !location.pathname.includes("/embed/") && !location.pathname.includes("/shorts/") && location.pathname !== "")
+    if (location.pathname !== "/watch" && !location.pathname.includes("/embed/") && !location.pathname.includes("/shorts/") && location.pathname !== "/")
         return;
     var isYTShorts = location.pathname.includes("/shorts/");
     if (location.pathname !== "/watch" && !location.pathname.includes("/embed/") && !isYTShorts && !sentReset) {
