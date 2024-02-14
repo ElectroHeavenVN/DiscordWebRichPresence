@@ -39,7 +39,7 @@ function refreshInfo() {
         if (document.querySelector(".html5-video-player") != null)
             playing = document.querySelector(".html5-video-player#" + (isYTShorts ? "shorts-player" : "movie_player")).classList.contains("playing-mode");
         if (isYTShorts && shortsVideoElement != null)
-            title = shortsVideoElement.querySelector("ytd-reel-player-header-renderer > h2").innerText;
+            title = shortsVideoElement.querySelector("reel-player-header-renderer > h2").innerText;
         else if (document.querySelector("#info .title") != null)
             title = document.querySelector("#info .title").innerText;
         var isLiveStreaming = document.querySelector("#movie_player > div.ytp-chrome-bottom > div.ytp-chrome-controls > div.ytp-left-controls > div.ytp-time-display.notranslate.ytp-live > button") != null;
