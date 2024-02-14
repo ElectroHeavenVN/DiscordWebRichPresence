@@ -62,7 +62,7 @@ function refreshInfo() {
         }
         if (isYTShorts) {
             videoId = location.pathname.substring(location.pathname.lastIndexOf('/') + 1);
-            isMemberOnly = shortsVideoElement.querySelector("ytd-reel-player-header-renderer #badge svg") != null;
+            isMemberOnly = shortsVideoElement.querySelector("ytd-reel-player-overlay-renderer #badge svg") != null;
         }
         else {
             if (document.querySelector("#content > #page-manager> ytd-watch-flexy") == null)
