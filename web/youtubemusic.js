@@ -27,7 +27,11 @@ function refreshInfo()
         if (author == null)
             return;
         author = author.innerText;
-        var videoId = document.querySelector("div.thumbnail-image-wrapper.style-scope.ytmusic-player-bar > img").src.replace("https://i.ytimg.com/vi/", "").substring(0, 11);
+        var videoId = document.querySelector("#movie_player > div.ytp-chrome-top > div.ytp-title > div > a").href;
+        if (videoId === "")
+            return;
+        videoId = videoId.substring(videoId.indexOf("v=") + 2, videoId.indexOf("v=") + 13);
+        var thumbnailLink = document.querySelector("div.thumbnail-image-wrapper.style-scope.ytmusic-player-bar > img").src;
         if (lastPlaying !== playing || lastTitle !== title || Math.abs(Date.now() - lastTimeStamp - elapsed) >= 1000) {
             lastPlaying = playing;
             lastTitle = title;
@@ -40,7 +44,7 @@ function refreshInfo()
                     name: "YouTube Music",
                     details: title,
                     state: "by " + author,
-                    largeImage: "https://i.ytimg.com/vi/" + videoId + "/hqdefault.jpg",
+                    largeImage: thumbnailLink,
                     timeStart: lastTimeStamp,
                     timeEnd: Date.now() - elapsed + total,
                     button1Text: "Listen on YouTube Music",
