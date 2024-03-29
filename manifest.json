@@ -136,11 +136,11 @@
 		},
 		{
 			"matches": [
-				"https://aniwatch.to/*"
+				"https://hianime.to/*"
 			],
 			"all_frames": true,
 			"js": [
-				"web/aniwatch.js",
+				"web/hianime.js",
 				"content_script.js"
 			],
 			"run_at": "document_idle"
