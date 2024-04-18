@@ -147,7 +147,9 @@
 		},
 		{
 			"matches": [
-				"https://anix.to/*"
+				"https://anix.to/*",
+				"https://anix.ac/*",
+				"https://anix.vc/*"
 			],
 			"all_frames": true,
 			"js": [
