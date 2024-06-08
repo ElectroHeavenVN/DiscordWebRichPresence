@@ -36,7 +36,7 @@ function refreshInfo() {
                         if (episode.className.endsWith(' active')) {
                             currentEp = 'Episode ' + episode.getAttribute('data-number');
                             if (episode.children.length > 1)
-                                currentState = episode.children[0].title;
+                                currentState = episode.querySelector(".ssli-detail").children[0].title;
                             link = episode.href;
                             break;
                         }
