@@ -45,7 +45,7 @@ function refreshInfo() {
             var seasons = document.querySelector("div.other-season .os-list");
             if (seasons != null) {
                 for (var element in seasons.children) {
-                    if (!Object.hasOwnProperty.call(seasons.children[0].children, element))
+                    if (!Object.hasOwnProperty.call(seasons.children, element))
                         continue;
                     var season = seasons.children[element];
                     if (season.className.endsWith(' active')) {
