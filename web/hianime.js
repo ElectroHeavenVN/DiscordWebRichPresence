@@ -16,7 +16,7 @@ function refreshInfo() {
     if (listening) {
         if (location.pathname.includes("/watch/")) {
             playing = document.querySelector("#iframe-embed") != null;
-            title = document.querySelector("#ani_detail div.anis-watch-wrap div.anis-watch-detail div.anisc-detail h2").innerText;
+            title = document.querySelector("#ani_detail div.anis-watch-wrap div.anis-watch-detail div.anisc-detail h2 a").title;
             var eps = document.querySelector("#detail-ss-list > div").children;
             var epsRange = null;
             for (var key in eps) {
