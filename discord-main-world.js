@@ -197,13 +197,30 @@ async function GetActivities(currActivities) {
             activity.metadata.album_id = discordActivityData.albumID;
         if (typeof (discordActivityData.artistIDs) === "object" && discordActivityData.artistIDs !== null && discordActivityData.artistIDs.length > 0)
             activity.metadata.artist_ids = discordActivityData.artistIDs;
+        if (typeof (discordActivityData.metadataType) === "object" && discordActivityData.metadataType !== null && discordActivityData.metadataType.length > 0)
+            activity.metadata.type = discordActivityData.metadataType;
+        let userID = null;
+        try {
+            userID = (window.webpackChunkdiscord_app.push([
+                [''], {},
+                e => {
+                    m = [];
+                    for (let c in e.c) m.push(e.c[c])
+                }
+            ]), m).find(m => m?.exports?.default?.getCurrentUser !== void 0).exports.default.getCurrentUser().id;
+        } catch (e) {
+            userID = "000000000000000000";
+        }
         if (typeof (activity.party) !== 'undefined')
-            activity.party.id = 'spotify:000000000000000000';
+            activity.party.id = 'spotify:' + userID;
         else
             activity.party = {
-                id: 'spotify:000000000000000000'
+                id: 'spotify:' + userID
             };
-        activity.sync_id = "0000000000000000000000";
+        if (typeof (discordActivityData.syncID) === "string" && discordActivityData.syncID !== null && discordActivityData.syncID.length > 0)
+            activity.sync_id = discordActivityData.syncID;
+        else
+            activity.sync_id = "0000000000000000000000";
     }
 
     let links = [];
@@ -296,6 +313,8 @@ function SetDiscordActivityData(msg) {
             discordActivityData.contextUri = msg.contextUri;
             discordActivityData.albumID = msg.albumID;
             discordActivityData.artistIDs = msg.artistIDs;
+            discordActivityData.syncID = msg.syncID;
+            discordActivityData.metadataType = msg.metadataType;
         }
         SendDiscordActivity();
     }

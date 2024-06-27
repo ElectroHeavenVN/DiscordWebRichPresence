@@ -85,7 +85,6 @@ function refreshInfo() {
             lastTimeStamp = Date.now();
         data = {
             applicationId: appId,
-            dontSave: true,
             type: ActivityType.Watching,
             name: "YouTube" + (isYTShorts ? " Shorts" : ""),
             details: title,

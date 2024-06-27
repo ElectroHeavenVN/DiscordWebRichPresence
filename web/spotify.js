@@ -47,7 +47,7 @@ function refreshInfo() {
                 if (hiddenElement.nextSibling.className.includes(' '))  //seeking
                     return;
                 playbackProgressBarElement = hiddenElement.parentElement;
-                var playbackButtons = playbackProgressBarElement.parentElement.previousSibling.children;
+                var playbackButtons = playbackProgressBarElement.parentElement.parentElement.previousElementSibling.children;
                 for (var key2 in playbackButtons) {
                     if (Object.hasOwnProperty.call(playbackButtons, key2)) {
                         var playbackButton = playbackButtons[key2];
@@ -79,7 +79,6 @@ function refreshInfo() {
                     }
                 }).then(r => r.json()).then(r => {
                     data = {
-                        dontSave: true,
                         type: ActivityType.Listening,
                         flags: ActivityFlags.Sync | ActivityFlags.Play,
                         name: "Spotify",
@@ -91,10 +90,12 @@ function refreshInfo() {
                         timeEnd: Date.now() - timePassed + duration,
                         button1Text: "Listen on Spotify",
                         button1Url: "https://open.spotify.com/track/" + songID,
-
-                        contextUri: 'spotify:album:' + albumID,
+                        contextUri: "https://open.spotify.com/track/" + songID,
+                        syncID: songID,
                         albumID: albumID,
                         artistIDs: artistIDs,
+                        metadataType: "track",
+
                     };
                     sentReset = false;
                     setTimeout(() => {

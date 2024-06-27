@@ -67,7 +67,6 @@ function refreshInfo() {
         if (playing) {
             data = {
                 applicationId: appId,
-                dontSave: true,
                 type: ActivityType.Watching,
                 name: "AniWave",
                 details: title,

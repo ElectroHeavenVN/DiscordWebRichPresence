@@ -39,7 +39,6 @@ function refreshInfo()
             if (playing) {
                 data = {
                     applicationId: appId,
-                    dontSave: true,
                     type: ActivityType.Listening,
                     name: "YouTube Music",
                     details: title,

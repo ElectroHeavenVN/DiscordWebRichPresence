@@ -62,7 +62,6 @@
 //         if (playing) {
 //             data = {
 //                 applicationId: appId,
-//                 dontSave: true,
 //                 type: ActivityType.Watching,
 //                 name: "AniWatch",
 //                 details: title,

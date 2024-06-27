@@ -32,11 +32,10 @@ function refreshInfo()
             if (playing) {
                 data = {
                     applicationId: appId,
-                    dontSave: true,
                     type: ActivityType.Listening,
                     name: "Zing MP3",
                     details: title,
-                    state: "bởi " + songAuthors,
+                    state: "by " + songAuthors,
                     largeImage: artworkLink,
                     timeStart: lastTimeStamp,
                     timeEnd: Date.now() - elapsed + total,

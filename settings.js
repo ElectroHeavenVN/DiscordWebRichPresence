@@ -5,11 +5,13 @@ if (typeof browser === "undefined") {
 document.addEventListener('DOMContentLoaded', () => {
     const backImg = document.getElementById('backImg');
     const enableJoinButtonSwitch = document.getElementById('enable-join-button-switch');
+    const changeListeningToSpButtonSwitch = document.getElementById('change-listening-to-sp-switch');
     
     function sendUpdate() {
         browser.runtime.sendMessage({
             action: "updateSettings",
             enableJoinButton: enableJoinButtonSwitch.checked,
+            changeListeningToSp: changeListeningToSpButtonSwitch.checked,
         });
     }
     backImg.addEventListener('click', () => {
@@ -19,8 +21,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (enableJoinButtonSwitchState !== null) {
         enableJoinButtonSwitch.checked = enableJoinButtonSwitchState === 'true';
     }
+    const changeListeningToSpButtonSwitchState = localStorage.getItem('changeListeningToSp');
+    if (changeListeningToSpButtonSwitchState !== null) {
+        changeListeningToSpButtonSwitch.checked = changeListeningToSpButtonSwitchState === 'true';
+    }
     enableJoinButtonSwitch.addEventListener('change', () => {
         localStorage.setItem('enableJoinButton', enableJoinButtonSwitch.checked);
+        sendUpdate();
+    })
+    changeListeningToSpButtonSwitch.addEventListener('change', () => {
+        localStorage.setItem('changeListeningToSp', changeListeningToSpButtonSwitch.checked);
         sendUpdate();
     })
 });

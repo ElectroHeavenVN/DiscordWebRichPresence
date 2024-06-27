@@ -5,6 +5,7 @@ if (typeof browser === "undefined") {
 }
 var activities = [];
 var enableJoinButton;
+var changeListeningToSp;
 
 const ActivityFlags = {
 	Instance: 1 << 0,
@@ -18,6 +19,15 @@ const ActivityFlags = {
 	Embedded: 1 << 8,
 }
 
+const ActivityType = {
+    Game: 0,
+    Streaming: 1,
+    Listening: 2,
+    Watching: 3,
+    Custom: 4,
+    Competing: 5
+};
+
 //reference: https://stackoverflow.com/a/66618269/22911487
 const keepAlive = () => setInterval(chrome.runtime.getPlatformInfo, 20000);
 browser.runtime.onStartup.addListener(keepAlive);
@@ -28,6 +38,7 @@ setInterval(checkDisconnectedActivities, 5000);
 browser.storage.local.get("settings", settings => {
 	settings = settings.settings;
 	enableJoinButton = settings.enableJoinButton;
+	changeListeningToSp = settings.changeListeningToSp;
 });
 
 function sendMessageToDiscordTab(message) {
@@ -209,9 +220,11 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 				browser.storage.local.set({
 					"settings": {
 						enableJoinButton: request.enableJoinButton,
+						changeListeningToSp: request.changeListeningToSp,
 					}
 				});
 				enableJoinButton = request.enableJoinButton;
+				changeListeningToSp = request.changeListeningToSp;
 				removeOldActivities();
 				if (activities.length == 0)
 					break;
@@ -219,7 +232,13 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 				if (enableJoinButton)
 					activities[0].activity.flags |= ActivityFlags.Embedded;
 				else if ((activities[0].activity.flags & ActivityFlags.Embedded) == ActivityFlags.Embedded)
-					activities[0].activity.flags -= ActivityFlags.Embedded;
+					activities[0].activity.flags ^= ActivityFlags.Embedded;
+				if (changeListeningToSp && activities[0].activity.type == ActivityType.Listening) {
+					activities[0].activity.applicationId = 0;
+					activities[0].activity.details = '[' + activities[0].activity.name + '] ' + activities[0].activity.details;
+					activities[0].activity.name = "Spotify";
+					activities[0].activity.contextUri = activities[0].activity.button1Url;
+				}
 				if (oldFlags != activities[0].activity.flags)
 					sendMessageToDiscordTab(activities[0].activity);
 				break;
@@ -261,8 +280,25 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 				activities.splice(index, 1);
 			removeOldActivities();
 			if (activities.length > 0 && status.state.find(e => e.id == activities[0].id).enabled) {
-				if (activities[0].id == request.id)
+				if (activities[0].id == request.id) {
+					if (enableJoinButton)
+						activities[0].activity.flags |= ActivityFlags.Embedded;
+					else if ((activities[0].activity.flags & ActivityFlags.Embedded) == ActivityFlags.Embedded)
+						activities[0].activity.flags ^= ActivityFlags.Embedded;
+					if (changeListeningToSp && activities[0].activity.type == ActivityType.Listening && activities[0].activity.name !== "Spotify") {
+						activities[0].activity.applicationId = 0;
+						activities[0].activity.details = '[' + activities[0].activity.name + '] ' + activities[0].activity.details;
+						activities[0].activity.state = activities[0].activity.state.replace('by ', '');
+						activities[0].activity.name = "Spotify";
+						if (activities[0].activity.button1Url)
+							activities[0].activity.contextUri = activities[0].activity.syncID = activities[0].activity.button1Url;
+						if (activities[0].activity.button2Url)
+							activities[0].activity.artistIDs = [activities[0].activity.button2Url];
+						activities[0].activity.albumID = "0";
+						activities[0].activity.metadataType = "track";
+					}
 					sendMessageToDiscordTab(activities[0].activity);
+				}
 			}
 			else
 				resetActivity();

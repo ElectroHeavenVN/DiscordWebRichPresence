@@ -34,7 +34,6 @@ function refreshInfo()
         if (playing) {
             data = {
                 applicationId: appId,
-                dontSave: true,
                 type: ActivityType.Listening,
                 name: "SoundCloud",
                 details: song,
