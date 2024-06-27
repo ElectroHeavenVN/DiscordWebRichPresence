@@ -233,11 +233,17 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 					activities[0].activity.flags |= ActivityFlags.Embedded;
 				else if ((activities[0].activity.flags & ActivityFlags.Embedded) == ActivityFlags.Embedded)
 					activities[0].activity.flags ^= ActivityFlags.Embedded;
-				if (changeListeningToSp && activities[0].activity.type == ActivityType.Listening) {
+				if (changeListeningToSp && activities[0].activity.type == ActivityType.Listening && activities[0].activity.name !== "Spotify") {
 					activities[0].activity.applicationId = 0;
 					activities[0].activity.details = '[' + activities[0].activity.name + '] ' + activities[0].activity.details;
+					activities[0].activity.state = activities[0].activity.state.replace('by ', '');
 					activities[0].activity.name = "Spotify";
-					activities[0].activity.contextUri = activities[0].activity.button1Url;
+					if (activities[0].activity.button1Url)
+						activities[0].activity.contextUri = activities[0].activity.syncID = activities[0].activity.button1Url;
+					if (activities[0].activity.button2Url)
+						activities[0].activity.artistIDs = [activities[0].activity.button2Url];
+					activities[0].activity.albumID = "0";
+					activities[0].activity.metadataType = "track";
 				}
 				if (oldFlags != activities[0].activity.flags)
 					sendMessageToDiscordTab(activities[0].activity);
