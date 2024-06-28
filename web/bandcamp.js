@@ -13,6 +13,7 @@ function refreshInfo()
         song = "",
         songLink = "",
         songAuthor = "",
+        songAuthorProfilePic = "",
         songAuthorLink = "",
         artworkLink = "";
     var audioElem = document.querySelector("audio");
@@ -21,13 +22,12 @@ function refreshInfo()
     var timePassed = audioElem.currentTime * 1000;
     var duration = audioElem.duration * 1000;
     playing = !audioElem.paused;
-    if (true) {
-        song = document.querySelector('.trackTitle').innerText;
-        songLink = document.querySelector('.title_link.primaryText').href;
-        songAuthor = document.querySelector(".albumTitle span").innerText;
-        songAuthorLink = document.querySelector(".albumTitle span a").href;
-        artworkLink = document.querySelector("#tralbumArt a").href;
-    }
+    song = document.querySelector('.trackTitle').innerText;
+    songLink = document.querySelector('.title_link.primaryText').href;
+    songAuthor = document.querySelector(".albumTitle span").innerText;
+    songAuthorProfilePic = document.querySelector(".artists-bio-pic a").href;
+    songAuthorLink = document.querySelector(".albumTitle span a").href;
+    artworkLink = document.querySelector("#tralbumArt a").href;
     if (lastPlaying !== playing || lastSong !== song || Math.abs(Date.now() - lastTimeStamp - timePassed) >= 1000) {
         lastPlaying = playing;
         lastSong = song;
@@ -40,6 +40,8 @@ function refreshInfo()
                 details: song,
                 state: "by " + songAuthor,
                 largeImage: artworkLink,
+                smallImage: songAuthorProfilePic,
+                smallText: songAuthor,
                 timeStart: lastTimeStamp,
                 timeEnd: Date.now() - timePassed + duration,
                 button1Text: "Listen on Bandcamp",
