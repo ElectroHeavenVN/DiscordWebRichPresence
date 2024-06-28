@@ -108,6 +108,17 @@
 		},
 		{
 			"matches": [
+				"https://*.bandcamp.com/*"
+			],
+			"all_frames": true,
+			"js": [
+				"web/bandcamp.js",
+				"content_script.js"
+			],
+			"run_at": "document_idle"
+		},
+		{
+			"matches": [
 				"https://aniwave.to/*",
 				"https://aniwave.ws/*",
 				"https://aniwave.vc/*",
