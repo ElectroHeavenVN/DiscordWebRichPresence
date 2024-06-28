@@ -234,7 +234,6 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 				else if ((activities[0].activity.flags & ActivityFlags.Embedded) == ActivityFlags.Embedded)
 					activities[0].activity.flags ^= ActivityFlags.Embedded;
 				if (changeListeningToSp && activities[0].activity.type == ActivityType.Listening && activities[0].activity.name !== "Spotify") {
-					activities[0].activity.applicationId = 0;
 					activities[0].activity.details = '[' + activities[0].activity.name + '] ' + activities[0].activity.details;
 					activities[0].activity.state = activities[0].activity.state.replace('by ', '');
 					activities[0].activity.name = "Spotify";
@@ -292,7 +291,6 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 					else if ((activities[0].activity.flags & ActivityFlags.Embedded) == ActivityFlags.Embedded)
 						activities[0].activity.flags ^= ActivityFlags.Embedded;
 					if (changeListeningToSp && activities[0].activity.type == ActivityType.Listening && activities[0].activity.name !== "Spotify") {
-						activities[0].activity.applicationId = 0;
 						activities[0].activity.details = '[' + activities[0].activity.name + '] ' + activities[0].activity.details;
 						activities[0].activity.state = activities[0].activity.state.replace('by ', '');
 						activities[0].activity.name = "Spotify";
