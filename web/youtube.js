@@ -83,6 +83,15 @@ function refreshInfo() {
         }
         else
             lastTimeStamp = Date.now();
+        var largeText = "";
+        if (isMemberOnly)
+        {
+            largeText = "Members only";
+            if (!playing)
+                largeText += " - ";
+        }
+        if (!playing)
+            largeText += "Paused";
         data = {
             applicationId: appId,
             type: ActivityType.Watching,
@@ -92,7 +101,7 @@ function refreshInfo() {
             timeEnd: timeEnd,
             timeStart: lastTimeStamp,
             largeImage: "https://i.ytimg.com/vi/" + videoId + "/hqdefault.jpg",
-            largeText: playing ? (isMemberOnly ? "Member only" : "") : "Paused",
+            largeText: largeText,
             smallImage: channelProfilePicture,
             smallText: channelName,
             button1Text: isLiveStreaming ? "Watch livestream on YouTube" : "Watch video on YouTube" + (isYTShorts ? " Shorts" : ""),
