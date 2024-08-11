@@ -9,7 +9,7 @@ var lastSmallMpImage = "";
 var discordGateway;
 var activityQueue = [];
 var sendingActivity;
-var currentActivities;
+var currentActivities = [];
 
 var discordActivityData = {
     type: 0,
@@ -57,15 +57,15 @@ window.WebSocket = function (u, p) {
 
 window.WebSocket.prototype.send = function (d) {
     var cancelSend = false;
-    if (this.downstreamSocket === discordGateway) {
-        if (d.substr(0, 8) === '{"op":3,') {
+    if (d.substr(0, 8) === '{"op":3,') {
+        if (this.downstreamSocket === discordGateway) {
             const j = JSON.parse(d);
             st = j.d.status;
             since = j.d.since;
             afk = j.d.afk;
             if (JSON.stringify(currentActivities.concat(otherActivities)) != JSON.stringify(j.d.activities)) {
                 cancelSend = true;
-                otherActivities = j.d.activities;
+                otherActivities = j.d.activities.concat(otherActivities);
                 GetActivities([]).then(activities => {
                     j.d.activities = activities;
                     d = JSON.stringify(j);
@@ -93,8 +93,8 @@ document.addEventListener('wrp', function (msg) {
 
 function send(downstreamSocket, data) {
     var cancelSend = false;
-    if (downstreamSocket === discordGateway) {
-        if (data.substr(0, 8) === '{"op":3,') {
+    if (data.substr(0, 8) === '{"op":3,') {
+        if (downstreamSocket === discordGateway) {
             cancelSend = true;
             const j = JSON.parse(data);
             currentActivities = j.d.activities;
