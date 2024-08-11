@@ -6,6 +6,7 @@ if (typeof browser === "undefined") {
 var activities = [];
 var enableJoinButton;
 var changeListeningToSp;
+var delayOtherActivities;
 
 const ActivityFlags = {
 	Instance: 1 << 0,
@@ -20,12 +21,12 @@ const ActivityFlags = {
 }
 
 const ActivityType = {
-    Game: 0,
-    Streaming: 1,
-    Listening: 2,
-    Watching: 3,
-    Custom: 4,
-    Competing: 5
+	Game: 0,
+	Streaming: 1,
+	Listening: 2,
+	Watching: 3,
+	Custom: 4,
+	Competing: 5
 };
 
 //reference: https://stackoverflow.com/a/66618269/22911487
@@ -39,6 +40,7 @@ browser.storage.local.get("settings", settings => {
 	settings = settings.settings;
 	enableJoinButton = settings.enableJoinButton;
 	changeListeningToSp = settings.changeListeningToSp;
+	delayOtherActivities = settings.delayOtherActivities;
 });
 
 function sendMessageToDiscordTab(message) {
@@ -138,6 +140,10 @@ browser.runtime.onConnect.addListener(port => {
 			else {
 				resetActivity();
 			}
+			sendMessageToDiscordTab({
+				action: "updateDelayOtherActivities",
+				value: delayOtherActivities
+			});
 		}
 		else if (port.name == "webRichPresence") {
 			if (webPort == undefined)
@@ -221,10 +227,16 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 					"settings": {
 						enableJoinButton: request.enableJoinButton,
 						changeListeningToSp: request.changeListeningToSp,
+						delayOtherActivities: request.delayOtherActivities
 					}
 				});
 				enableJoinButton = request.enableJoinButton;
 				changeListeningToSp = request.changeListeningToSp;
+				delayOtherActivities = request.delayOtherActivities;
+				sendMessageToDiscordTab({
+					action: "updateDelayOtherActivities",
+					value: delayOtherActivities
+				});
 				removeOldActivities();
 				if (activities.length == 0)
 					break;

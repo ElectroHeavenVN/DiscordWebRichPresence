@@ -10,6 +10,9 @@ port.onMessage.addListener(msg => {
 			case "close":
 				closeOK = true;
 				break;
+			case "updateDelayOtherActivities":
+				document.dispatchEvent(new CustomEvent('updateDelayOtherActivities', { detail: { value: msg.value } }));
+				break;
 			default:
 				console.warn("Unknown action", msg.action);
 		}

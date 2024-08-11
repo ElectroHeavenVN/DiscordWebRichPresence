@@ -10,6 +10,7 @@ var discordGateway;
 var activityQueue = [];
 var sendingActivity;
 var currentActivities = [];
+var delayOtherActivities = false;
 
 var discordActivityData = {
     type: 0,
@@ -91,17 +92,33 @@ document.addEventListener('wrp', function (msg) {
     SetDiscordActivityData(msg.detail);
 });
 
+document.addEventListener('updateDelayOtherActivities', function (msg) {
+    delayOtherActivities = msg.detail.value;
+});
+
 function send(downstreamSocket, data) {
     var cancelSend = false;
     if (data.substr(0, 8) === '{"op":3,') {
         if (downstreamSocket === discordGateway) {
             cancelSend = true;
-            const j = JSON.parse(data);
-            currentActivities = j.d.activities;
-            if (otherActivities.length > 0)
-                j.d.activities = j.d.activities.concat(otherActivities);
-            data = JSON.stringify(j);
-            downstreamSocket.send(data);
+            var j = JSON.parse(data);
+            if (delayOtherActivities) {
+                currentActivities = j.d.activities;
+                downstreamSocket.send(data);
+                setTimeout(() => {
+                    if (otherActivities.length > 0)
+                        j.d.activities = j.d.activities.concat(otherActivities);
+                    data = JSON.stringify(j);
+                    downstreamSocket.send(data);
+                }, Math.floor(Math.random() * (7000 - 2000 + 1)) + 2000);
+            }
+            else {
+                currentActivities = j.d.activities;
+                if (otherActivities.length > 0)
+                    j.d.activities = j.d.activities.concat(otherActivities);
+                data = JSON.stringify(j);
+                downstreamSocket.send(data);
+            }
         }
     }
     if (!cancelSend)
