@@ -11,6 +11,7 @@ var activityQueue = [];
 var sendingActivity;
 var currentActivities = [];
 var delayOtherActivities = false;
+var gotReponseFromBGWorker = false;
 
 var discordActivityData = {
     type: 0,
@@ -67,11 +68,13 @@ window.WebSocket.prototype.send = function (d) {
             if (JSON.stringify(currentActivities.concat(otherActivities)) != JSON.stringify(j.d.activities)) {
                 cancelSend = true;
                 otherActivities = j.d.activities;
-                GetActivities([]).then(activities => {
-                    j.d.activities = activities;
-                    d = JSON.stringify(j);
-                    send(this.downstreamSocket, d);
-                });
+                if (gotReponseFromBGWorker) {
+                    GetActivities([]).then(activities => {
+                        j.d.activities = activities;
+                        d = JSON.stringify(j);
+                        send(this.downstreamSocket, d);
+                    });
+                }
             }
         }
     }
@@ -304,6 +307,7 @@ async function getExternalAssetsLink(appId, token, links) {
 
 function SetDiscordActivityData(msg) {
     var appId = msg.applicationId;
+    gotReponseFromBGWorker = true;
     if (appId !== "0" || discordActivityData.applicationId !== appId) {
         discordActivityData = {
             flags: msg.flags,

@@ -137,12 +137,41 @@ browser.runtime.onConnect.addListener(port => {
 					state: status.state
 				});
 			}
-			else {
+			else
 				resetActivity();
-			}
 			sendMessageToDiscordTab({
 				action: "updateDelayOtherActivities",
 				value: delayOtherActivities
+			});
+			browser.storage.local.get("status", status => {
+				status = status.status;
+				removeOldActivities();
+				setTimeout(() => {
+					if (activities.length > 0 && status.state.find(e => e.id == activities[0].id).enabled)
+						sendMessageToDiscordTab(activities[0].activity);
+					else
+						sendMessageToDiscordTab({
+							type: 0,
+							flags: ActivityFlags.Instance,
+							applicationId: "0",
+							name: "",
+							streamUrl: "",
+							details: "",
+							state: "",
+							partyCur: "",
+							partyMax: "",
+							largeImage: "",
+							largeText: "",
+							smallImage: "",
+							smallText: "",
+							timeStart: "",
+							timeEnd: "",
+							button1Text: "",
+							button1Url: "",
+							button2Text: "",
+							button2Url: "",
+						})
+				}, 2000);
 			});
 		}
 		else if (port.name == "webRichPresence") {
