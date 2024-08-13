@@ -13,12 +13,15 @@ port.onMessage.addListener(msg => {
 			case "updateDelayOtherActivities":
 				document.dispatchEvent(new CustomEvent('updateDelayOtherActivities', { detail: { value: msg.value } }));
 				break;
+			case "resetActivities":
+				document.dispatchEvent(new CustomEvent('resetActivities'));
+				break;
 			default:
 				console.warn("Unknown action", msg.action);
 		}
 	}
-	else if (msg.type !== undefined && msg.name !== undefined) {
-		document.dispatchEvent(new CustomEvent('wrp', { detail: msg }));
+	else if (Array.isArray(msg.activities)) {
+		document.dispatchEvent(new CustomEvent('wrp', { detail: msg.activities }));
 	}
 })
 port.onDisconnect.addListener(() => {

@@ -23,9 +23,10 @@ const ActivityFlags = {
 	Embedded: 1 << 8,
 }
 
-var currentPresence = null;
+var currentActivities = [];
+var currentIndex = 0;
 
-function sendUpdate() {
+function SendUpdate() {
     browser.runtime.sendMessage({
         action: "updateEnabledStatus",
         enabled: masterSwitch.checked,
@@ -38,7 +39,7 @@ function sendUpdate() {
     });
 }
 
-function convertMillisecondsToHHMMSS(milliseconds) {
+function FormatMilliseconds(milliseconds) {
     var totalSeconds = Math.floor(milliseconds / 1000);
     var hours = Math.floor(totalSeconds / 3600);
     var minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -49,7 +50,7 @@ function convertMillisecondsToHHMMSS(milliseconds) {
     return formattedTime;
 }
 
-function getStatusStr(type) {
+function GetStatusStr(type) {
     switch (type) {
         case ActivityType.Game:
             return 'Playing';
@@ -65,101 +66,118 @@ function getStatusStr(type) {
     return '';
 }
 
-function updateCurrentPresence() {
-    const currentPresencePanel = document.querySelector(".current-presence-panel");
-    currentPresencePanel.hidden = currentPresence == null;
-    if (currentPresencePanel.hidden) {
+function UpdateCurrentActivities() {
+    const previousButton = document.querySelector(".previous-activity-button");
+    const nextButton = document.querySelector(".next-activity-button");
+    const ratioLabel = document.querySelector(".select-activity-buttons-container label");
+
+    if (currentActivities.length <= 1) {
+        previousButton.disabled = true;
+        nextButton.disabled = true;
+    }
+    else {
+        previousButton.disabled = currentIndex === 0;
+        nextButton.disabled = currentIndex === currentActivities.length - 1;
+    }
+    if (currentIndex >= currentActivities.length)
+        currentIndex = currentActivities.length - 1;
+    if (currentIndex < 0)
+        currentIndex = 0;
+    ratioLabel.innerText = (currentIndex + 1) + '/' + currentActivities.length;
+    var displayedActivity = currentActivities[currentIndex] ? currentActivities[currentIndex].activity : null;
+    const currentActivityPanel = document.querySelector(".current-activity-panel");
+    currentActivityPanel.hidden = displayedActivity == null;
+    if (currentActivityPanel.hidden) {
         document.querySelector(".switches-container").style.maxHeight = "420px";
         return;
     }
     document.querySelector(".switches-container").style.maxHeight = "160px";
-    const title = currentPresencePanel.querySelector(".title");
-    const largeImage = currentPresencePanel.querySelector(".image > img:first-child");
-    const smallImage = currentPresencePanel.querySelector(".image > img:last-child");
-    const details = currentPresencePanel.querySelector(".current-presence-details");
-    const state = currentPresencePanel.querySelector(".current-presence-state");
-    const largeText = currentPresencePanel.querySelector(".current-presence-large-text");
-    const buttons = currentPresencePanel.querySelector(".buttons").children;
-
-    if (currentPresence.name) {
+    const title = currentActivityPanel.querySelector(".title");
+    const largeImage = currentActivityPanel.querySelector(".image > img:first-child");
+    const smallImage = currentActivityPanel.querySelector(".image > img:last-child");
+    const details = currentActivityPanel.querySelector(".current-activity-details");
+    const state = currentActivityPanel.querySelector(".current-activity-state");
+    const largeText = currentActivityPanel.querySelector(".current-activity-large-text");
+    const buttons = currentActivityPanel.querySelector(".buttons").children;
+    if (displayedActivity.name) {
         title.hidden = false;
-        title.innerText = getStatusStr(currentPresence.type) + ' ' + currentPresence.name;
-        title.title = currentPresence.name;
+        title.innerText = GetStatusStr(displayedActivity.type) + ' ' + displayedActivity.name;
+        title.title = displayedActivity.name;
     }
     else
         title.hidden = true;
-    if (currentPresence.details) {
+    if (displayedActivity.details) {
         details.hidden = false;
-        details.innerText = details.title = currentPresence.details;
+        details.innerText = details.title = displayedActivity.details;
     }
     else
         details.hidden = true;
-    if (currentPresence.state) {
+    if (displayedActivity.state) {
         state.hidden = false;
-        state.innerText = state.title = currentPresence.state;
+        state.innerText = state.title = displayedActivity.state;
     }
     else
         state.hidden = true;
-    if (currentPresence.largeText) {
+    if (displayedActivity.largeText) {
         largeText.hidden = false;
-        largeImage.title = largeText.innerText = largeText.title = currentPresence.largeText;
+        largeImage.title = largeText.innerText = largeText.title = displayedActivity.largeText;
     }
     else {
         largeText.hidden = true;
         largeImage.title = '';
     }
 
-    if (currentPresence.largeImage) {
+    if (displayedActivity.largeImage) {
         largeImage.hidden = false;
-        largeImage.src = currentPresence.largeImage;
+        largeImage.src = displayedActivity.largeImage;
     }
     else
         largeImage.hidden = true;
 
-    if (currentPresence.smallText)
-        smallImage.title = currentPresence.smallText;
+    if (displayedActivity.smallText)
+        smallImage.title = displayedActivity.smallText;
     else
         smallImage.title = '';
-    if (currentPresence.smallImage) {
+    if (displayedActivity.smallImage) {
         smallImage.hidden = false;
-        smallImage.src = currentPresence.smallImage;
+        smallImage.src = displayedActivity.smallImage;
     }
     else
         smallImage.hidden = true;
 
-    if (currentPresence.button1Text) {
+    if (displayedActivity.button1Text) {
         buttons[1].hidden = false;
-        buttons[1].innerText = currentPresence.button1Text;
+        buttons[1].innerText = displayedActivity.button1Text;
     }
     else
         buttons[1].hidden = true;
-    if (currentPresence.button2Text) {
+    if (displayedActivity.button2Text) {
         buttons[2].hidden = false;
-        buttons[2].innerText = currentPresence.button2Text;
+        buttons[2].innerText = displayedActivity.button2Text;
     }
     else
         buttons[2].hidden = true;
-    buttons[0].hidden = (currentPresence.flags & ActivityFlags.Embedded) != ActivityFlags.Embedded;
-    updateTimeBar();
+    buttons[0].hidden = (displayedActivity.flags & ActivityFlags.Embedded) != ActivityFlags.Embedded;
+    UpdateTimeBar(displayedActivity);
 }
 
-function updateTimeBar() {
-    if (currentPresence) {
-        const currentPresencePanel = document.querySelector(".current-presence-panel");
-        const timeBar = currentPresencePanel.querySelector(".timebar");
+function UpdateTimeBar(displayedActivity) {
+    if (displayedActivity) {
+        const currentActivityPanel = document.querySelector(".current-activity-panel");
+        const timeBar = currentActivityPanel.querySelector(".timebar");
         const timeElapsed = timeBar.querySelector("label.timeElapsed");
         const timeTotal = timeBar.querySelector("label.timeTotal");
         const timeBarInner = timeBar.querySelector("div:nth-child(1) > div");
 
-        if (currentPresence.timeStart && currentPresence.timeEnd) {
+        if (displayedActivity.timeStart && displayedActivity.timeEnd) {
             timeBar.hidden = false;
-            var elapsed = Date.now() - currentPresence.timeStart;
-            var total = currentPresence.timeEnd - currentPresence.timeStart;
+            var elapsed = Date.now() - displayedActivity.timeStart;
+            var total = displayedActivity.timeEnd - displayedActivity.timeStart;
             if (elapsed > total)
                 elapsed = total;
             var oldTimeElapsed = timeElapsed.innerText;
-            timeElapsed.innerText = convertMillisecondsToHHMMSS(elapsed);
-            timeTotal.innerText = convertMillisecondsToHHMMSS(total);
+            timeElapsed.innerText = FormatMilliseconds(elapsed);
+            timeTotal.innerText = FormatMilliseconds(total);
             if (oldTimeElapsed !== timeElapsed.innerText)
                 timeBarInner.style.width = (elapsed * 100 / total).toString() + '%';
         }
@@ -173,6 +191,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const dependentSwitches = document.querySelectorAll('.dependent-switch');
     const resetButton = document.getElementById("resetButton");
     const settingsImg = document.getElementById("settingsImg");
+    const previousButton = document.querySelector(".previous-activity-button");
+    const nextButton = document.querySelector(".next-activity-button");
     const savedMasterSwitchState = localStorage.getItem('enableWebRichPresence');
 
     if (savedMasterSwitchState !== null) {
@@ -191,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dependentSwitch.closest('.switch').classList.toggle('disabled', dependentSwitch.disabled);
         dependentSwitch.addEventListener('change', () => {
             localStorage.setItem(dependentSwitch.id, dependentSwitch.checked);
-            sendUpdate();
+            SendUpdate();
         });
         const savedDependentSwitchState = localStorage.getItem(dependentSwitch.id);
         if (savedDependentSwitchState !== null) {
@@ -214,29 +234,39 @@ document.addEventListener('DOMContentLoaded', () => {
             switchElem.closest('.switch').classList.toggle('disabled', switchElem.disabled);
         });
         localStorage.setItem('enableWebRichPresence', masterSwitch.checked);
-        sendUpdate();
+        SendUpdate();
     });
     resetButton.addEventListener('click', () => browser.runtime.sendMessage({
         action: "reset"
     }));
     settingsImg.addEventListener('click', () => window.location.href = "settings.html");
+    previousButton.addEventListener('click', () => {
+        if (currentIndex > 0)
+            currentIndex--;
+        UpdateCurrentActivities();
+    });
+    nextButton.addEventListener('click', () => {
+        if (currentIndex < currentActivities.length - 1)
+            currentIndex++;
+        UpdateCurrentActivities();
+    });
     setInterval(() => browser.runtime.sendMessage({
-        action: "getCurrentPresence"
+        action: "getCurrentActivities"
     }), 1000);
     browser.runtime.sendMessage({
-        action: "getCurrentPresence"
+        action: "getCurrentActivities"
     });
-    setInterval(updateTimeBar, 500);
-    document.querySelector(".current-presence-panel .buttons > button:nth-child(2)").addEventListener('click', () => window.open(currentPresence.button1Url, '_blank'))
-    document.querySelector(".current-presence-panel .buttons > button:nth-child(3)").addEventListener('click', () => window.open(currentPresence.button2Url, '_blank'))
+    setInterval(UpdateTimeBar, 500);
+    document.querySelector(".current-activity-panel .buttons > button:nth-child(2)").addEventListener('click', () => window.open(currentActivity.button1Url, '_blank'))
+    document.querySelector(".current-activity-panel .buttons > button:nth-child(3)").addEventListener('click', () => window.open(currentActivity.button2Url, '_blank'))
 });
 
 browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action !== undefined) {
         switch (request.action) {
-            case 'currentPresence':
-                currentPresence = request.data;
-                updateCurrentPresence();
+            case 'currentActivities':
+                currentActivities = request.data;
+                UpdateCurrentActivities();
                 break;
             default:
                 break;

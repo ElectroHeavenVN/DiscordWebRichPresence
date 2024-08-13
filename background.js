@@ -4,7 +4,7 @@ let webPorts = [];
 if (typeof browser === "undefined") {
 	var browser = chrome;
 }
-var activities = [];
+var currentActivities = [];
 var enableJoinButton;
 var changeListeningToSp;
 var delayOtherActivities;
@@ -35,7 +35,7 @@ const keepAlive = () => setInterval(chrome.runtime.getPlatformInfo, 20000);
 browser.runtime.onStartup.addListener(keepAlive);
 keepAlive();
 
-setInterval(checkDisconnectedActivities, 5000);
+setInterval(CheckDisconnectedActivities, 5000);
 
 browser.storage.local.get("settings", settings => {
 	settings = settings.settings;
@@ -44,68 +44,57 @@ browser.storage.local.get("settings", settings => {
 	delayOtherActivities = settings.delayOtherActivities;
 });
 
-function sendMessageToDiscordTab(message) {
+function SendMessageToDiscordTab(message) {
 	if (!discordPort)
 		return;
 	console.log("send message to Discord tab:", message);
 	discordPort.postMessage(message);
 }
 
-function resetActivity() {
+function ResetActivities() {
 	if (discordPort) {
-		activities = [];
-		sendMessageToDiscordTab({
-			type: 0,
-			flags: ActivityFlags.Instance,
-			applicationId: "0",
-			name: "",
-			streamUrl: "",
-			details: "",
-			state: "",
-			partyCur: "",
-			partyMax: "",
-			largeImage: "",
-			largeText: "",
-			smallImage: "",
-			smallText: "",
-			timeStart: "",
-			timeEnd: "",
-			button1Text: "",
-			button1Url: "",
-			button2Text: "",
-			button2Url: "",
+		currentActivities = [];
+		SendMessageToDiscordTab({
+			action: "resetActivities"
 		})
 	}
 }
 
-function removeOldActivities() {
-	for (let i = activities.length - 1; i >= 0; i--) {
-		if (Date.now() - activities[i].lastTimeAlive > 10000) {
+function RemoveOldActivities() {
+	for (let i = currentActivities.length - 1; i >= 0; i--) {
+		if (Date.now() - currentActivities[i].lastTimeAlive > 10000) {
 			console.log('remove activity at index ' + i);
-			activities.splice(0, 1);
+			currentActivities.splice(i, 1);
 		}
 	}
 }
 
-function checkDisconnectedActivities() {
+function CheckDisconnectedActivities() {
 	browser.storage.local.get("status", status => {
-		console.log('checking activities...')
+		//console.log('checking activities...')
 		status = status.status;
-		if (activities.length == 0) {
-			console.log('No activity');
+		if (currentActivities.length == 0) {
+			//console.log('No activity');
 			return;
 		}
-		else
-			console.log('Number of activities: ' + activities.length + "\r\n", activities);
-		var oldLength = activities.length;
-		removeOldActivities();
-		if (oldLength != activities.length && activities.length > 0 && status.state.find(e => e.id == activities[0].id).enabled) {
-			console.log('Send next activity to Discord');
-			sendMessageToDiscordTab(activities[0].activity);
+		//else
+		//console.log('Number of activities: ' + activities.length + "\r\n", activities);
+		var oldLength = currentActivities.length;
+		RemoveOldActivities();
+		if (oldLength != currentActivities.length) {
+			console.log('Send activities to Discord tab');
+			var filteredActivities = [];
+			for (let i = 0; i < currentActivities.length; i++) {
+				if (status.state.find(e => e.id == currentActivities[i].id).enabled)
+					filteredActivities.push(currentActivities[i].activity);
+			}
+			SendMessageToDiscordTab({
+				activities: filteredActivities
+			});
 		}
-		if (activities.length == 0) {
+		if (currentActivities.length == 0) {
 			console.log('Reset Discord activity');
-			resetActivity();
+			ResetActivities();
 		}
 	});
 }
@@ -117,7 +106,7 @@ browser.runtime.onConnect.addListener(port => {
 			return;
 		if (port.name == "discord") {
 			if (discordPort) {
-				sendMessageToDiscordTab({ action: "close" });
+				SendMessageToDiscordTab({ action: "close" });
 				discordPort.disconnect();
 			}
 			discordPort = port;
@@ -143,39 +132,23 @@ browser.runtime.onConnect.addListener(port => {
 				});
 			}
 			else
-				resetActivity();
-			sendMessageToDiscordTab({
+				ResetActivities();
+			SendMessageToDiscordTab({
 				action: "updateDelayOtherActivities",
 				value: delayOtherActivities
 			});
 			browser.storage.local.get("status", status => {
 				status = status.status;
-				removeOldActivities();
+				RemoveOldActivities();
 				setTimeout(() => {
-					if (activities.length > 0 && status.state.find(e => e.id == activities[0].id).enabled)
-						sendMessageToDiscordTab(activities[0].activity);
-					else
-						sendMessageToDiscordTab({
-							type: 0,
-							flags: ActivityFlags.Instance,
-							applicationId: "0",
-							name: "",
-							streamUrl: "",
-							details: "",
-							state: "",
-							partyCur: "",
-							partyMax: "",
-							largeImage: "",
-							largeText: "",
-							smallImage: "",
-							smallText: "",
-							timeStart: "",
-							timeEnd: "",
-							button1Text: "",
-							button1Url: "",
-							button2Text: "",
-							button2Url: "",
-						})
+					var filteredActivities = [];
+					for (let i = 0; i < currentActivities.length; i++) {
+						if (status.state.find(e => e.id == currentActivities[i].id).enabled)
+							filteredActivities.push(currentActivities[i].activity);
+					}
+					SendMessageToDiscordTab({
+						activities: filteredActivities
+					});
 				}, 2000);
 			});
 		}
@@ -197,7 +170,7 @@ browser.runtime.onConnect.addListener(port => {
 					webPorts.splice(index, 1);
 			})
 			port.postMessage({
-				listen: discordPort ? true : false,
+				listen: true,
 				state: status.state
 			});
 		}
@@ -219,18 +192,20 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 					}
 				})
 				if (!request.enabled) {
-					resetActivity();
-					activities = [];
+					ResetActivities();
 					break;
 				}
 				if (webPorts.length > 0) {
-					while (activities.length > 0 && !request.state.find(e => e.id == activities[0].id).enabled)
-						activities.splice(0, 1);
-					if (activities.length > 0 && request.state.find(e => e.id == activities[0].id).enabled) {
-						sendMessageToDiscordTab(activities[0].activity);
+					var filteredActivities = [];
+					for (let i = currentActivities.length - 1; i <= 0; i--) {
+						if (request.state.find(e => e.id == currentActivities[i].id).enabled)
+							filteredActivities.push(currentActivities[i].activity);
+						else 
+							currentActivities.splice(i, 1);
 					}
-					else
-						resetActivity();
+					SendMessageToDiscordTab({
+						activities: filteredActivities
+					});
 					webPorts.forEach(webPort => {
 						webPort.postMessage({
 							listen: true,
@@ -239,34 +214,34 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 					});
 				}
 				else
-					resetActivity();
+					ResetActivities();
 				break;
 			case "reset":
 				if (request.id !== undefined) {
-					var index = activities.map(o => o.id).indexOf(request.id);
+					var index = currentActivities.map(o => o.id).indexOf(request.id);
 					if (index != -1)
-						activities.splice(index, 1);
+						currentActivities.splice(index, 1);
 					browser.storage.local.get("status", status => {
 						status = status.status;
-						removeOldActivities();
-						if (activities.length > 0 && status.state.find(e => e.id == activities[0].id).enabled) {
-							if (index == 0)
-								sendMessageToDiscordTab(activities[0].activity);
+						RemoveOldActivities();
+						var filteredActivities = [];
+						for (let i = 0; i < currentActivities.length; i++) {
+							if (status.state.find(e => e.id == currentActivities[i].id).enabled)
+								filteredActivities.push(currentActivities[i].activity);
 						}
-						else
-							resetActivity();
+						SendMessageToDiscordTab({
+							activities: filteredActivities
+						});
 					});
 				}
-				else {
-					resetActivity();
-					activities = [];
-				}
+				else
+					ResetActivities();
 				sendResponse();
 				break;
 			case "ping":
-				var index = activities.map(o => o.id).indexOf(request.id);
-				if (index != -1 && typeof (activities[index].lastTimeAlive) !== "undefined")
-					activities[index].lastTimeAlive = Date.now();
+				var index = currentActivities.map(o => o.id).indexOf(request.id);
+				if (index != -1 && typeof (currentActivities[index].lastTimeAlive) !== "undefined")
+					currentActivities[index].lastTimeAlive = Date.now();
 				break;
 			case "updateSettings":
 				browser.storage.local.set({
@@ -279,42 +254,44 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 				enableJoinButton = request.enableJoinButton;
 				changeListeningToSp = request.changeListeningToSp;
 				delayOtherActivities = request.delayOtherActivities;
-				sendMessageToDiscordTab({
+				SendMessageToDiscordTab({
 					action: "updateDelayOtherActivities",
 					value: delayOtherActivities
 				});
-				removeOldActivities();
-				if (activities.length == 0)
+				RemoveOldActivities();
+				if (currentActivities.length == 0)
 					break;
-				var oldFlags = activities[0].activity.flags;
-				if (enableJoinButton)
-					activities[0].activity.flags |= ActivityFlags.Embedded;
-				else if ((activities[0].activity.flags & ActivityFlags.Embedded) == ActivityFlags.Embedded)
-					activities[0].activity.flags ^= ActivityFlags.Embedded;
-				if (changeListeningToSp && activities[0].activity.type == ActivityType.Listening && activities[0].activity.name !== "Spotify") {
-					activities[0].activity.details = '[' + activities[0].activity.name + '] ' + activities[0].activity.details;
-					activities[0].activity.state = activities[0].activity.state.replace('by ', '');
-					activities[0].activity.name = "Spotify";
-					if (activities[0].activity.button1Url)
-						activities[0].activity.contextUri = activities[0].activity.syncID = activities[0].activity.button1Url;
-					if (activities[0].activity.button2Url)
-						activities[0].activity.artistIDs = [activities[0].activity.button2Url];
-					activities[0].activity.albumID = "0";
-					activities[0].activity.metadataType = "track";
+				var filteredActivities = [];
+				for (let i = 0; i < currentActivities.length; i++) {
+					var activity = currentActivities[i];
+					if (enableJoinButton)
+						activity.activity.flags |= ActivityFlags.Embedded;
+					else if ((activity.activity.flags & ActivityFlags.Embedded) == ActivityFlags.Embedded)
+						activity.activity.flags ^= ActivityFlags.Embedded;
+					if (changeListeningToSp && activity.activity.type == ActivityType.Listening && activity.activity.name !== "Spotify") {
+						activity.activity.details = '[' + activity.activity.name + '] ' + activity.activity.details;
+						activity.activity.state = activity.activity.state.replace('by ', '');
+						activity.activity.name = "Spotify";
+						if (activity.activity.button1Url)
+							activity.activity.contextUri = activity.activity.syncID = activity.activity.button1Url;
+						if (activity.activity.button2Url)
+							activity.activity.artistIDs = [activity.activity.button2Url];
+						activity.activity.albumID = "0";
+						activity.activity.metadataType = "track";
+					}
+					filteredActivities.push(activity.activity);
 				}
-				if (oldFlags != activities[0].activity.flags)
-					sendMessageToDiscordTab(activities[0].activity);
-				break;
-			case 'getCurrentPresence':
-				var data = null;
-				if (activities.length > 0)
-					data = activities[0].activity;
-				browser.runtime.sendMessage({
-					action: 'currentPresence',
-					data: data
+				SendMessageToDiscordTab({
+					activities: filteredActivities
 				});
 				break;
-			case 'currentPresence':
+			case 'getCurrentActivities':
+				browser.runtime.sendMessage({
+					action: 'currentActivities',
+					data: currentActivities
+				});
+				break;
+			case 'currentActivities':
 				break;
 			default:
 				console.error("Unknown action", request.action);
@@ -326,7 +303,8 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 			status = status.status;
 			if (status.enabled == undefined || !status.enabled)
 				return;
-			var index = activities.map(o => o.id).indexOf(request.id);
+			var filteredActivities = [];
+			var index = currentActivities.map(o => o.id).indexOf(request.id);
 			if (status.state.find(e => e.id == request.id).enabled) {
 				var activity = {
 					id: request.id,
@@ -336,35 +314,40 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 				if (enableJoinButton)
 					activity.activity.flags |= ActivityFlags.Embedded;
 				if (index != -1)
-					activities[index] = activity;
+					currentActivities[index] = activity;
 				else
-					activities.push(activity);
+					currentActivities.push(activity);
 			}
 			else
-				activities.splice(index, 1);
-			removeOldActivities();
-			if (activities.length > 0 && status.state.find(e => e.id == activities[0].id).enabled) {
-				if (activities[0].id == request.id) {
+				currentActivities.splice(index, 1);
+			RemoveOldActivities();
+			for (let i = 0; i < currentActivities.length; i++) {
+				var activity = currentActivities[i];
+				if (!status.state.find(e => e.id == activity.id).enabled)
+					continue;
+				if (activity.id == request.id) {
 					if (enableJoinButton)
-						activities[0].activity.flags |= ActivityFlags.Embedded;
-					else if ((activities[0].activity.flags & ActivityFlags.Embedded) == ActivityFlags.Embedded)
-						activities[0].activity.flags ^= ActivityFlags.Embedded;
-					if (changeListeningToSp && activities[0].activity.type == ActivityType.Listening && activities[0].activity.name !== "Spotify") {
-						activities[0].activity.details = '[' + activities[0].activity.name + '] ' + activities[0].activity.details;
-						activities[0].activity.state = activities[0].activity.state.replace('by ', '');
-						activities[0].activity.name = "Spotify";
-						if (activities[0].activity.button1Url)
-							activities[0].activity.contextUri = activities[0].activity.syncID = activities[0].activity.button1Url;
-						if (activities[0].activity.button2Url)
-							activities[0].activity.artistIDs = [activities[0].activity.button2Url];
-						activities[0].activity.albumID = "0";
-						activities[0].activity.metadataType = "track";
+						activity.activity.flags |= ActivityFlags.Embedded;
+					else if ((activity.activity.flags & ActivityFlags.Embedded) == ActivityFlags.Embedded)
+						activity.activity.flags ^= ActivityFlags.Embedded;
+					if (changeListeningToSp && activity.activity.type == ActivityType.Listening && activity.activity.name !== "Spotify") {
+						activity.activity.details = '[' + activity.activity.name + '] ' + activity.activity.details;
+						activity.activity.state = activity.activity.state.replace('by ', '');
+						activity.activity.name = "Spotify";
+						if (activity.activity.button1Url)
+							activity.activity.contextUri = activity.activity.syncID = activity.activity.button1Url;
+						if (activity.activity.button2Url)
+							activity.activity.artistIDs = [activity.activity.button2Url];
+						activity.activity.albumID = "0";
+						activity.activity.metadataType = "track";
 					}
-					sendMessageToDiscordTab(activities[0].activity);
 				}
+				filteredActivities.push(activity.activity);
 			}
-			else
-				resetActivity();
+
+			SendMessageToDiscordTab({
+				activities: filteredActivities
+			});
 		});
 	}
 })

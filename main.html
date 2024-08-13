@@ -232,25 +232,33 @@
             </div>
         </div>
     </div>
-    
+
     <div class="separator"></div>
 
-    <div class="current-presence-panel" hidden>
-        <label class="title">Title</label>
-        <div class="current-presence">
+    <div class="current-activity-panel" hidden>
+        <div class="header">
+            <label class="title">Title</label>
+            <div class="select-activity-buttons-container">
+                <button class="previous-activity-button" disabled>&lt;</button>
+                <label>1/1</label>
+                <button class="next-activity-button" disabled>&gt;</button>
+            </div>
+        </div>
+        <div class="current-activity">
             <div class="image">
                 <img src="" alt="Large Image">
                 <img src="" alt="Small Image">
             </div>
-            <div class="current-presence-info">
+            <div class="current-activity-info">
                 <div>
-                    <div class="current-presence-details">Details</div>
-                    <div class="current-presence-state">State</div>
-                    <div class="current-presence-large-text">Large Text</div>
+                    <div class="current-activity-details">Details</div>
+                    <div class="current-activity-state">State</div>
+                    <div class="current-activity-large-text">Large Text</div>
                 </div>
             </div>
         </div>
-        <div class="timebar" title="You'll only see this timebar if you have installed Vencord extension and enabled the TimebarAllActivities plugin.">
+        <div class="timebar"
+            title="You'll only see this timebar if you have installed Vencord extension and enabled the TimebarAllActivities plugin.">
             <div>
                 <div class="timebar-inner"></div>
             </div>
@@ -270,7 +278,8 @@
     <footer>
         <div class="footer-container">
             <button id="resetButton">Reset current presence</button>
-            <a href="https://github.com/electroHeavenVN/DiscordWebRichPresence/" target="_blank">View source code on Github</a>
+            <a href="https://github.com/electroHeavenVN/DiscordWebRichPresence/" target="_blank">View source code on
+                Github</a>
         </div>
     </footer>
 
