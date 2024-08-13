@@ -1,4 +1,5 @@
-let discordPort, webPort;
+let discordPort = null;
+let webPorts = [];
 
 if (typeof browser === "undefined") {
 	var browser = chrome;
@@ -44,14 +45,14 @@ browser.storage.local.get("settings", settings => {
 });
 
 function sendMessageToDiscordTab(message) {
-	if (discordPort === undefined)
+	if (!discordPort)
 		return;
 	console.log("send message to Discord tab:", message);
 	discordPort.postMessage(message);
 }
 
 function resetActivity() {
-	if (discordPort !== undefined) {
+	if (discordPort) {
 		activities = [];
 		sendMessageToDiscordTab({
 			type: 0,
@@ -115,7 +116,7 @@ browser.runtime.onConnect.addListener(port => {
 		if (status.enabled == undefined || !status.enabled)
 			return;
 		if (port.name == "discord") {
-			if (discordPort !== undefined) {
+			if (discordPort) {
 				sendMessageToDiscordTab({ action: "close" });
 				discordPort.disconnect();
 			}
@@ -123,18 +124,22 @@ browser.runtime.onConnect.addListener(port => {
 			console.info("New connection from Discord tab");
 			port.onDisconnect.addListener(() => {
 				console.info("Discord tab disconnected");
-				discordPort = undefined;
-				if (webPort !== undefined) {
-					webPort.postMessage({
-						listen: false,
-						state: status.state
+				discordPort = null;
+				if (webPorts.length > 0) {
+					webPorts.forEach(webPort => {
+						webPort.postMessage({
+							listen: false,
+							state: status.state
+						});
 					});
 				}
 			})
-			if (webPort !== undefined) {
-				webPort.postMessage({
-					listen: true,
-					state: status.state
+			if (webPorts.length > 0) {
+				webPorts.forEach(webPort => {
+					webPort.postMessage({
+						listen: true,
+						state: status.state
+					});
 				});
 			}
 			else
@@ -174,15 +179,25 @@ browser.runtime.onConnect.addListener(port => {
 				}, 2000);
 			});
 		}
-		else if (port.name == "webRichPresence") {
-			if (webPort == undefined)
-				webPort = port;
-			console.info("New connection from other tab");
+		else if (port.name.startsWith("webRichPresence_")) {
+			console.log("New connection from " + port.name);
+			var index = webPorts.map(o => o.name).indexOf(port.name);
+			if (index == -1) {
+				console.log(`Add ${port.name} to the list`);
+				webPorts.push(port);
+			}
+			else {
+				console.log(`${port.name} already exists in the list, replace it`);
+				webPorts[index] = port;
+			}
 			port.onDisconnect.addListener(() => {
-				console.info("Another tab disconnected");
+				console.info(port.name + " disconnected");
+				var index = webPorts.map(o => o.name).indexOf(port.name);
+				if (index != -1)
+					webPorts.splice(index, 1);
 			})
 			port.postMessage({
-				listen: true,
+				listen: discordPort ? true : false,
 				state: status.state
 			});
 		}
@@ -193,7 +208,7 @@ browser.runtime.onConnect.addListener(port => {
 	});
 })
 browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
-	console.info(request);
+	//console.info(request);
 	if (request.action !== undefined) {
 		switch (request.action) {
 			case "updateEnabledStatus":
@@ -208,7 +223,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 					activities = [];
 					break;
 				}
-				if (webPort !== undefined) {
+				if (webPorts.length > 0) {
 					while (activities.length > 0 && !request.state.find(e => e.id == activities[0].id).enabled)
 						activities.splice(0, 1);
 					if (activities.length > 0 && request.state.find(e => e.id == activities[0].id).enabled) {
@@ -216,9 +231,11 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 					}
 					else
 						resetActivity();
-					webPort.postMessage({
-						listen: true,
-						state: request.state
+					webPorts.forEach(webPort => {
+						webPort.postMessage({
+							listen: true,
+							state: request.state
+						});
 					});
 				}
 				else
@@ -304,6 +321,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 		}
 	}
 	else {
+		console.info(request);
 		browser.storage.local.get("status", status => {
 			status = status.status;
 			if (status.enabled == undefined || !status.enabled)

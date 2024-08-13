@@ -12,7 +12,7 @@ const ActivityType = {
 };
 
 var port = browser.runtime.connect({
-    name: "webRichPresence"
+    name: `webRichPresence_${id}_${Math.round(Math.random() * 10000000)}`,
 });
 var listening = false;
 var data = false;
