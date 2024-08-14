@@ -13,6 +13,7 @@ var currentActivities = [];
 var currentActivitiesFromBGWorker = [];
 var delayOtherActivities = false;
 var gotReponseFromBGWorker = false;
+var cachedExternalImages = [];
 
 const originalWebSocket = window.WebSocket;
 const originalWebSocketProperties = ["binaryType", "bufferedAmount", "extensions", "onclose", "onmessage", "onopen", "protocol", "readyState", "url"];
@@ -152,7 +153,7 @@ function SendDiscordActivity() {
 async function GetActivities() {
     var result = [];
     for (let i = 0; i < currentActivitiesFromBGWorker.length; i++) {
-        var activityFromBGWorker = currentActivitiesFromBGWorker[i];    
+        var activityFromBGWorker = currentActivitiesFromBGWorker[i];
         if ((typeof (activityFromBGWorker.applicationId) !== "string" || activityFromBGWorker.applicationId === null || activityFromBGWorker.applicationId.length === 0 || activityFromBGWorker.applicationId === "0") && activityFromBGWorker.name !== "Spotify")
             continue;
         let activity = {
@@ -256,24 +257,32 @@ async function GetActivities() {
             lastSmallImage = activityFromBGWorker.smallImage;
         }
         if (links.length > 0) {
-            let token = null;
-            try {
-                token = (window.webpackChunkdiscord_app.push([
-                    [''], {},
-                    e => {
-                        m = [];
-                        for (let c in e.c) m.push(e.c[c])
-                    }
-                ]), m).find(m => m?.exports?.default?.getToken !== void 0).exports.default.getToken();
-            } catch (e) {
-                continue;
+            var cachedLargeImage = cachedExternalImages.find(e => e.url === activityFromBGWorker.largeImage);
+            if (cachedLargeImage) {
+                lastLargeMpImage = activity.assets.large_image = "mp:" + cachedLargeImage.externalAssetPath;
+                links.splice(links.indexOf(activityFromBGWorker.largeImage), 1);
             }
-            var data = await GetExternalAssetsLink(activity.application_id, token, links);
+            var cachedSmallImage = cachedExternalImages.find(e => e.url === activityFromBGWorker.smallImage);
+            if (cachedSmallImage) {
+                lastSmallMpImage = activity.assets.small_image = "mp:" + cachedSmallImage.externalAssetPath;
+                links.splice(links.indexOf(activityFromBGWorker.smallImage), 1);
+            }
+        }
+        if (links.length > 0) {
+            var data = await GetExternalAssetsLink(activity.application_id, links);
+            if (data.length === 0)
+                continue;
             for (let i = 0; i < data.length; i++) {
-                if (activityFromBGWorker.largeImage === data[i].url)
+                if (activityFromBGWorker.largeImage === data[i].url) {
                     lastLargeMpImage = activity.assets.large_image = "mp:" + data[i].external_asset_path;
-                if (activityFromBGWorker.smallImage === data[i].url)
+                    if (!cachedExternalImages.find(e => e.url === activityFromBGWorker.largeImage))
+                        cachedExternalImages.push({ url: activityFromBGWorker.largeImage, externalAssetPath: data[i].external_asset_path });
+                }
+                if (activityFromBGWorker.smallImage === data[i].url) {
                     lastSmallMpImage = activity.assets.small_image = "mp:" + data[i].external_asset_path;
+                    if (!cachedExternalImages.find(e => e.url === activityFromBGWorker.smallImage))
+                        cachedExternalImages.push({ url: activityFromBGWorker.smallImage, externalAssetPath: data[i].external_asset_path });
+                }
             }
         }
         result.unshift(activity);
@@ -281,7 +290,19 @@ async function GetActivities() {
     return result;
 }
 
-async function GetExternalAssetsLink(appId, token, links) {
+async function GetExternalAssetsLink(appId, links) {
+    let token = null;
+    try {
+        token = (window.webpackChunkdiscord_app.push([
+            [''], {},
+            e => {
+                m = [];
+                for (let c in e.c) m.push(e.c[c])
+            }
+        ]), m).find(m => m?.exports?.default?.getToken !== void 0).exports.default.getToken();
+    } catch (e) {
+        return [];
+    }
     return await (await fetch('https://discord.com/api/v9/applications/' + appId + '/external-assets', {
         method: 'POST',
         headers: {
