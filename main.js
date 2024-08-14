@@ -12,15 +12,15 @@ const ActivityType = {
 };
 
 const ActivityFlags = {
-	Instance: 1 << 0,
-	Join: 1 << 1,
-	Spectate: 1 << 2,
-	JoinRequest: 1 << 3,
-	Sync: 1 << 4,
-	Play: 1 << 5,
-	PartyPrivacyFriends: 1 << 6,
-	PartyPrivacyVoiceChannel: 1 << 7,
-	Embedded: 1 << 8,
+    Instance: 1 << 0,
+    Join: 1 << 1,
+    Spectate: 1 << 2,
+    JoinRequest: 1 << 3,
+    Sync: 1 << 4,
+    Play: 1 << 5,
+    PartyPrivacyFriends: 1 << 6,
+    PartyPrivacyVoiceChannel: 1 << 7,
+    Embedded: 1 << 8,
 }
 
 var currentActivities = [];
@@ -257,8 +257,16 @@ document.addEventListener('DOMContentLoaded', () => {
         action: "getCurrentActivities"
     });
     setInterval(UpdateTimeBar, 500);
-    document.querySelector(".current-activity-panel .buttons > button:nth-child(2)").addEventListener('click', () => window.open(currentActivity.button1Url, '_blank'))
-    document.querySelector(".current-activity-panel .buttons > button:nth-child(3)").addEventListener('click', () => window.open(currentActivity.button2Url, '_blank'))
+    document.querySelector(".current-activity-panel .buttons > button:nth-child(2)").addEventListener('click', () => {
+        var displayedActivity = currentActivities[currentIndex] ? currentActivities[currentIndex].activity : null;
+        if (displayedActivity)
+            window.open(displayedActivity.button1Url, '_blank');
+    })
+    document.querySelector(".current-activity-panel .buttons > button:nth-child(3)").addEventListener('click', () => {
+        var displayedActivity = currentActivities[currentIndex] ? currentActivities[currentIndex].activity : null;
+        if (displayedActivity)
+            window.open(displayedActivity.button2Url, '_blank');
+    });
 });
 
 browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
