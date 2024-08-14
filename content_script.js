@@ -11,6 +11,11 @@ const ActivityType = {
     Competing: 5
 };
 
+const SmallIcons = {
+    playing: 'https://cdn.discordapp.com/app-assets/1163025400469934161/1273187177173352478.png',
+    paused: 'https://cdn.discordapp.com/app-assets/1163025400469934161/1273187177274019850.png',
+}
+
 var port = browser.runtime.connect({
     name: `webRichPresence_${id}_${Math.round(Math.random() * 10000000)}`,
 });

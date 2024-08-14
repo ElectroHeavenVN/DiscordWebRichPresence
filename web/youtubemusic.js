@@ -5,8 +5,7 @@ var lastTitle = "";
 var lastTimeStamp = 0;
 var sentReset = false;
 
-function refreshInfo()
-{
+function refreshInfo() {
     if (listening) {
         let playing = false,
             title = ""
@@ -17,48 +16,8 @@ function refreshInfo()
             }
         }
         var videoPlayer = document.getElementsByTagName('video')[0];
-        if (videoPlayer == null)
-            return;
-        var elapsed = Math.round(videoPlayer.currentTime * 1000)
-        var total = Math.round(videoPlayer.duration * 1000)
-        if (total == NaN || elapsed == NaN)
-            return;
-        var author = document.querySelector(".style-scope ytmusic-player-bar .subtitle a");
-        if (author == null)
-            return;
-        author = author.innerText;
-        var videoId = document.querySelector("#movie_player > div.ytp-chrome-top > div.ytp-title > div > a").href;
-        if (videoId === "")
-            return;
-        videoId = videoId.substring(videoId.indexOf("v=") + 2, videoId.indexOf("v=") + 13);
-        var thumbnailLink = document.querySelector("div.thumbnail-image-wrapper.style-scope.ytmusic-player-bar > img").src;
-        if (lastPlaying !== playing || lastTitle !== title || Math.abs(Date.now() - lastTimeStamp - elapsed) >= 1000) {
-            lastPlaying = playing;
-            lastTitle = title;
-            lastTimeStamp = Date.now() - elapsed;
-            if (playing) {
-                data = {
-                    applicationId: appId,
-                    type: ActivityType.Listening,
-                    name: "YouTube Music",
-                    details: title,
-                    state: "by " + author,
-                    largeImage: thumbnailLink,
-                    timeStart: lastTimeStamp,
-                    timeEnd: Date.now() - elapsed + total,
-                    button1Text: "Listen on YouTube Music",
-                    button1Url: "https://music.youtube.com/watch?v=" + videoId,
-                    button2Text: "View channel",
-                    button2Url: document.querySelector("#layout > ytmusic-player-bar > div.middle-controls.style-scope.ytmusic-player-bar > div.content-info-wrapper.style-scope.ytmusic-player-bar > span > span.subtitle.style-scope.ytmusic-player-bar > yt-formatted-string > a").href,
-                };
-                sentReset = false;
-                setTimeout(() => {
-                    browser.runtime.sendMessage({
-                        id,
-                        status: data
-                    });
-                }, 10);
-            } else if (!sentReset) {
+        if (videoPlayer == null) {
+            if (!sentReset) {
                 data = false;
                 try {
                     browser.runtime.sendMessage({
@@ -68,6 +27,72 @@ function refreshInfo()
                     sentReset = true;
                 } catch (e) { }
             }
+            return;
+        }
+        var elapsed = Math.round(videoPlayer.currentTime * 1000)
+        var total = Math.round(videoPlayer.duration * 1000)
+        if (total == NaN || elapsed == NaN)
+            return;
+        var authors = document.querySelectorAll(".style-scope ytmusic-player-bar .subtitle a");
+        if (authors.length == 0)
+            return;
+        var videoId = document.querySelector("div.ytp-title a").href;
+        if (videoId === "")
+            return;
+        videoId = videoId.substring(videoId.indexOf("v=") + 2, videoId.indexOf("v=") + 13);
+        var album = '';
+        var authorsText = Array.from(authors).filter(a => !a.href.includes('browse/')).map(a => a.innerText).join(', ');
+        if (authorsText === '')
+            authorsText = document.querySelector(".style-scope ytmusic-player-bar .subtitle span").innerText;
+        var albumElement = document.querySelector('.style-scope ytmusic-player-bar .subtitle a[href*="browse/"]');
+        if (albumElement != null)
+            album = albumElement.innerText;
+        var thumbnailLink = document.querySelector(".ytmusic-player-bar img").src;
+        var timeEnd = 0;
+        if (playing)
+            timeEnd = Date.now() - elapsed + total;
+        if (lastPlaying !== playing || lastTitle !== title || Math.abs(Date.now() - lastTimeStamp - elapsed) >= 1000) {
+            lastPlaying = playing;
+            lastTitle = title;
+            lastTimeStamp = Date.now() - elapsed;
+
+            data = {
+                applicationId: appId,
+                type: ActivityType.Listening,
+                name: "YouTube Music",
+                details: title,
+                state: "by " + authorsText,
+                largeImage: thumbnailLink,
+                timeStart: lastTimeStamp,
+                timeEnd: timeEnd,
+                button1Text: "Listen on YouTube Music",
+                button1Url: "https://music.youtube.com/watch?v=" + videoId,
+                largeText: '',
+            };
+            if (album !== '') {
+                data.largeText = album;
+                data.button2Text = "View album";
+                data.button2Url = albumElement.href;
+            }
+            else {
+                data.button2Text = "View channel";
+                data.button2Url = document.querySelector("span.subtitle.style-scope.ytmusic-player-bar a").href;
+            }
+            if (!playing) {
+                data.smallImage = SmallIcons.paused;
+                data.smallText = "Paused";
+            }
+            else {
+                data.smallImage = SmallIcons.playing;
+                data.smallText = "Playing";
+            }
+            sentReset = false;
+            setTimeout(() => {
+                browser.runtime.sendMessage({
+                    id,
+                    status: data
+                });
+            }, 10);
         }
     }
 }

@@ -237,7 +237,7 @@ async function GetActivities() {
         if (typeof (activityFromBGWorker.largeImage) === "string" && activityFromBGWorker.largeImage !== null && activityFromBGWorker.largeImage.length > 0) {
             if (activityFromBGWorker.largeImage.startsWith('spotify:'))
                 activity.assets.large_image = activityFromBGWorker.largeImage;
-            else if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/(attachments|app-icons)\//.test(activityFromBGWorker.largeImage))
+            else if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/(attachments|app-icons|app-assets)\//.test(activityFromBGWorker.largeImage))
                 activity.assets.large_image = "mp:" + activityFromBGWorker.largeImage.replace(/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");
             else if (lastLargeImage === activityFromBGWorker.largeImage)
                 activity.assets.large_image = lastLargeMpImage;
@@ -248,7 +248,7 @@ async function GetActivities() {
         if (typeof (activityFromBGWorker.smallImage) === "string" && activityFromBGWorker.smallImage !== null && activityFromBGWorker.smallImage.length > 0) {
             if (activityFromBGWorker.smallImage.startsWith('spotify:'))
                 activity.assets.small_image = activityFromBGWorker.smallImage;
-            else if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/attachments\//.test(activityFromBGWorker.smallImage))
+            else if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/(attachments|app-icons|app-assets)\//.test(activityFromBGWorker.smallImage))
                 activity.assets.small_image = "mp:" + activityFromBGWorker.smallImage.replace(/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");
             else if (lastSmallImage === activityFromBGWorker.smallImage)
                 activity.assets.small_image = lastSmallMpImage;

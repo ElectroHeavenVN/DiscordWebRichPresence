@@ -31,38 +31,49 @@ function refreshInfo() {
             lastPlaying = playing;
             lastSong = song;
             lastTimeStamp = Date.now() - timePassed;
-            if (playing) {
-                data = {
-                    applicationId: appId,
-                    type: ActivityType.Listening,
-                    name: "SoundCloud",
-                    details: song,
-                    state: "by " + songAuthor,
-                    largeImage: artworkLink,
-                    timeStart: lastTimeStamp,
-                    timeEnd: Date.now() - timePassed + duration,
-                    button1Text: "Listen on SoundCloud",
-                    button1Url: songLink,
-                    button2Text: "View artist",
-                    button2Url: songAuthorLink,
-                };
-                sentReset = false;
-                setTimeout(() => {
-                    browser.runtime.sendMessage({
-                        id,
-                        status: data
-                    });
-                }, 10);
-            } else if (!sentReset) {
-                data = false;
-                try {
-                    browser.runtime.sendMessage({
-                        id,
-                        action: "reset"
-                    });
-                    sentReset = true;
-                } catch (e) { }
+            var timeEnd = 0;
+            if (playing)
+                timeEnd = Date.now() - timePassed + duration;
+            data = {
+                applicationId: appId,
+                type: ActivityType.Listening,
+                name: "SoundCloud",
+                details: song,
+                state: "by " + songAuthor,
+                largeImage: artworkLink,
+                timeStart: lastTimeStamp,
+                timeEnd: timeEnd,
+                button1Text: "Listen on SoundCloud",
+                button1Url: songLink,
+                button2Text: "View artist",
+                button2Url: songAuthorLink,
+            };
+            if (!playing) {
+                data.smallImage = SmallIcons.paused;
+                data.smallText = "Paused";
             }
+            else {
+                data.smallImage = SmallIcons.playing;
+                data.smallText = "Playing";
+            }
+            sentReset = false;
+            setTimeout(() => {
+                browser.runtime.sendMessage({
+                    id,
+                    status: data
+                });
+            }, 10);
         }
-    } catch (e) { }
+    } catch (e) {
+        if (!sentReset) {
+            data = false;
+            try {
+                browser.runtime.sendMessage({
+                    id,
+                    action: "reset"
+                });
+                sentReset = true;
+            } catch (e) { }
+        }
+    }
 }

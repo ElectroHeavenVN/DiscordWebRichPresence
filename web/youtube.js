@@ -85,13 +85,7 @@ function refreshInfo() {
             lastTimeStamp = Date.now();
         var largeText = "";
         if (isMemberOnly)
-        {
             largeText = "Members only";
-            if (!playing)
-                largeText += " - ";
-        }
-        if (!playing)
-            largeText += "Paused";
         data = {
             applicationId: appId,
             type: ActivityType.Watching,
@@ -109,6 +103,10 @@ function refreshInfo() {
             button2Text: "View channel",
             button2Url: channelLink,
         };
+        if (!playing) {
+            data.smallImage = SmallIcons.paused;
+            data.smallText = "Paused";
+        }
         setTimeout(() => {
             browser.runtime.sendMessage({
                 id,

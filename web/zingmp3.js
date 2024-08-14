@@ -5,8 +5,7 @@ var lastSong = "";
 var lastTimeStamp = 0;
 var sentReset = false;
 
-function refreshInfo()
-{
+function refreshInfo() {
     if (listening) {
         let playing = false,
             title = "",
@@ -14,8 +13,19 @@ function refreshInfo()
             songAuthors = "",
             artworkLink = "";
         var audioPlayers = document.getElementsByTagName('audio');
-        if (audioPlayers.length == 0)
+        if (audioPlayers.length == 0) {
+            if (!sentReset) {
+                data = false;
+                try {
+                    browser.runtime.sendMessage({
+                        id,
+                        action: "reset"
+                    });
+                    sentReset = true;
+                } catch (e) { }
+            }
             return;
+        }
         let elapsed = Math.round(audioPlayers[0].currentTime * 1000);
         let total = Math.round(audioPlayers[0].duration * 1000);
         if (document.querySelector("#root > div.zm-section.zm-layout.has-player > div.zm-section.now-playing-bar > div") != null) {
@@ -29,36 +39,36 @@ function refreshInfo()
             lastPlaying = playing;
             lastSong = title;
             lastTimeStamp = Date.now() - elapsed;
-            if (playing) {
-                data = {
-                    applicationId: appId,
-                    type: ActivityType.Listening,
-                    name: "Zing MP3",
-                    details: title,
-                    state: "by " + songAuthors,
-                    largeImage: artworkLink,
-                    timeStart: lastTimeStamp,
-                    timeEnd: Date.now() - elapsed + total,
-                    button1Text: "Nghe trên Zing MP3",
-                    button1Url: songLink,
-                };
-                sentReset = false;
-                setTimeout(() => {
-                    browser.runtime.sendMessage({
-                        id,
-                        status: data
-                    });
-                }, 10);
-            } else if (!sentReset) {
-                data = false;
-                try {
-                    browser.runtime.sendMessage({
-                        id,
-                        action: "reset"
-                    });
-                    sentReset = true;
-                } catch (e) { }
+            var timeEnd = 0;
+            if (playing)
+                timeEnd = Date.now() - elapsed + total;
+            data = {
+                applicationId: appId,
+                type: ActivityType.Listening,
+                name: "Zing MP3",
+                details: title,
+                state: "by " + songAuthors,
+                largeImage: artworkLink,
+                timeStart: lastTimeStamp,
+                timeEnd: timeEnd,
+                button1Text: "Nghe trên Zing MP3",
+                button1Url: songLink,
+            };
+            if (!playing) {
+                data.smallImage = SmallIcons.paused;
+                data.smallText = "Paused";
             }
+            else {
+                data.smallImage = SmallIcons.playing;
+                data.smallText = "Playing";
+            }
+            sentReset = false;
+            setTimeout(() => {
+                browser.runtime.sendMessage({
+                    id,
+                    status: data
+                });
+            }, 10);
         }
     }
 }

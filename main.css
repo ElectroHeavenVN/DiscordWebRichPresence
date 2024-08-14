@@ -250,6 +250,10 @@ input:checked:disabled+.slider:before,
     width: auto;
 }
 
+.current-activity .image img {
+    background-color: black;
+}
+
 .current-activity .image :first-child {
     width: 60px;
     height: 60px;

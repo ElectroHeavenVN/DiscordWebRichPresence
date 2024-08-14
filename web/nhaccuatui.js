@@ -13,10 +13,21 @@ function refreshInfo() {
 			songAuthors = "",
 			artworkLink = "";
 		var audioPlayers = document.getElementsByTagName('audio');
-		if (audioPlayers.length == 0)
+		if (audioPlayers.length === 0) {
+			if (!sentReset) {
+				data = false;
+				try {
+					browser.runtime.sendMessage({
+						id,
+						action: "reset"
+					});
+					sentReset = true;
+				} catch (e) { }
+			}
 			return;
-		let elapsed = Math.round(audioPlayers[0].currentTime * 1000);
-		let total = Math.round(audioPlayers[0].duration * 1000);
+		}
+		let timePassed = Math.round(audioPlayers[0].currentTime * 1000);
+		let duration = Math.round(audioPlayers[0].duration * 1000);
 		if (document.querySelector("#flashPlayer") != null) {
 			playing = !audioPlayers[0].paused;
 			title = document.querySelector("#box_playing_id > div.info_name_songmv.playerwapper-song > div.name_title > h1").innerText;
@@ -28,40 +39,40 @@ function refreshInfo() {
 			else
 				artworkLink = artworkLink.substring(5, artworkLink.length - 2);
 		}
-		if (lastPlaying !== playing || lastSong !== title || Math.abs(Date.now() - lastTimeStamp - elapsed) >= 1000) {
+		if (lastPlaying !== playing || lastSong !== title || Math.abs(Date.now() - lastTimeStamp - timePassed) >= 1000) {
 			lastPlaying = playing;
 			lastSong = title;
-			lastTimeStamp = Date.now() - elapsed;
-			if (playing) {
-				data = {
-					applicationId: appId,
-					type: ActivityType.Listening,
-					name: "NhacCuaTui",
-					details: title,
-					state: "by " + songAuthors,
-					largeImage: artworkLink,
-					timeStart: lastTimeStamp,
-					timeEnd: Date.now() - elapsed + total,
-					button1Text: "Nghe trên NhacCuaTui",
-					button1Url: songLink,
-				};
-				sentReset = false;
-				setTimeout(() => {
-					browser.runtime.sendMessage({
-						id,
-						status: data
-					});
-				}, 10);
-			} else if (!sentReset) {
-				data = false;
-				try {
-					browser.runtime.sendMessage({
-						id,
-						action: "reset"
-					});
-					sentReset = true;
-				} catch (e) { }
+			var timeEnd = 0;
+			if (playing)
+				timeEnd = Date.now() - timePassed + duration;
+			lastTimeStamp = Date.now() - timePassed;
+			data = {
+				applicationId: appId,
+				type: ActivityType.Listening,
+				name: "NhacCuaTui",
+				details: title,
+				state: "by " + songAuthors,
+				largeImage: artworkLink,
+				timeStart: lastTimeStamp,
+				timeEnd: timeEnd,
+				button1Text: "Nghe trên NhacCuaTui",
+				button1Url: songLink,
+			};
+			if (!playing) {
+				data.smallImage = SmallIcons.paused;
+				data.smallText = "Paused";
 			}
+			else {
+				data.smallImage = SmallIcons.playing;
+				data.smallText = "Playing";
+			}
+			sentReset = false;
+			setTimeout(() => {
+				browser.runtime.sendMessage({
+					id,
+					status: data
+				});
+			}, 10);
 		}
 	}
 }

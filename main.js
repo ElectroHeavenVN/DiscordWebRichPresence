@@ -130,6 +130,8 @@ function UpdateCurrentActivities() {
     if (displayedActivity.largeImage) {
         largeImage.hidden = false;
         largeImage.src = displayedActivity.largeImage;
+        if (displayedActivity.largeImage.startsWith('spotify:'))
+            largeImage.src = 'https://i.scdn.co/image/' + displayedActivity.largeImage.split(':')[1];
     }
     else
         largeImage.hidden = true;
@@ -141,6 +143,8 @@ function UpdateCurrentActivities() {
     if (displayedActivity.smallImage) {
         smallImage.hidden = false;
         smallImage.src = displayedActivity.smallImage;
+        if (displayedActivity.smallImage.startsWith('spotify:'))
+            smallImage.src = 'https://i.scdn.co/image/' + displayedActivity.smallImage.split(':')[1];
     }
     else
         smallImage.hidden = true;
