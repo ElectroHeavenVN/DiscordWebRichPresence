@@ -140,7 +140,8 @@ browser.runtime.onConnect.addListener(port => {
 			browser.storage.local.get("status", status => {
 				status = status.status;
 				RemoveOldActivities();
-				setTimeout(() => {
+				var sendFirstMessageCount = 0;
+				var intervalSendFirstMessage = setInterval(() => {
 					var filteredActivities = [];
 					for (let i = 0; i < currentActivities.length; i++) {
 						if (status.state.find(e => e.id == currentActivities[i].id).enabled)
@@ -149,6 +150,9 @@ browser.runtime.onConnect.addListener(port => {
 					SendMessageToDiscordTab({
 						activities: filteredActivities
 					});
+					sendFirstMessageCount++;
+					if (sendFirstMessageCount >= 3)
+						clearInterval(intervalSendFirstMessage);
 				}, 2000);
 			});
 		}
