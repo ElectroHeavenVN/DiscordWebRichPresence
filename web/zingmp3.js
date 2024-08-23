@@ -4,6 +4,7 @@ var lastPlaying = false;
 var lastSong = "";
 var lastTimeStamp = 0;
 var sentReset = false;
+var lastMVLink = "";
 
 function refreshInfo() {
     if (listening) {
@@ -13,7 +14,8 @@ function refreshInfo() {
             songAuthors = "",
             artworkLink = "";
         var audioPlayers = document.getElementsByTagName('audio');
-        if (audioPlayers.length == 0) {
+        var videoPlayers = document.getElementsByTagName('video');
+        if (audioPlayers.length == 0 && videoPlayers.length == 0) {
             if (!sentReset) {
                 data = false;
                 try {
@@ -26,14 +28,33 @@ function refreshInfo() {
             }
             return;
         }
-        let elapsed = Math.round(audioPlayers[0].currentTime * 1000);
-        let total = Math.round(audioPlayers[0].duration * 1000);
-        if (document.querySelector("#root > div.zm-section.zm-layout.has-player > div.zm-section.now-playing-bar > div") != null) {
-            playing = !audioPlayers[0].paused;
-            title = document.querySelector("#root > div.zm-section.zm-layout.has-player > div.zm-section.now-playing-bar > div > div > div.player-controls-left.level-left > div > div > div.media-content > div > div > span > a > div > span").innerText;
-            songLink = document.querySelector("#root > div.zm-section.zm-layout.has-player > div.zm-section.now-playing-bar > div > div > div.player-controls-left.level-left > div > div > div.media-content > div > div > span > a").href;
-            songAuthors = document.querySelector("#root > div.zm-section.zm-layout.has-player > div.zm-section.now-playing-bar > div > div > div.player-controls-left.level-left > div > div > div.media-content > h3").innerText;
-            artworkLink = document.querySelector("#root > div.zm-section.zm-layout.has-player > div.zm-section.now-playing-bar > div > div > div.player-controls-left.level-left > div > div > div.media-left > a > div > div > figure > img").src;
+        let elapsed = 0;
+        let total = 0;
+        if (videoPlayers.length > 0) {
+            elapsed = Math.round(videoPlayers[0].currentTime * 1000);
+            total = Math.round(videoPlayers[0].duration * 1000);
+            playing = !videoPlayers[0].paused;
+            title = document.querySelector("#video-scroll .media-content .title").innerText;
+            songLink = window.location.href;
+            if (songLink.startsWith("https://zingmp3.vn/video-clip/"))
+                lastMVLink = songLink;
+            else 
+                songLink = lastMVLink;
+            songAuthors = document.querySelector("#video-scroll .media-content .subtitle.is-one-line").innerText;
+            artworkLink = document.querySelector("#video-queue-scroll .video-active img").src;
+            var artistArtworkLink = document.querySelector("#video-scroll .media-left img").src;
+            var mainSongAuthor = document.querySelector("#video-scroll .media-content .subtitle.is-one-line a").innerText;
+        }
+        else if (audioPlayers.length > 0) {
+            elapsed = Math.round(audioPlayers[0].currentTime * 1000);
+            total = Math.round(audioPlayers[0].duration * 1000);
+            if (document.querySelector("#root > div.zm-section.zm-layout.has-player > div.zm-section.now-playing-bar > div") != null) {
+                playing = !audioPlayers[0].paused;
+                title = document.querySelector("#root > div.zm-section.zm-layout.has-player > div.zm-section.now-playing-bar > div > div > div.player-controls-left.level-left > div > div > div.media-content > div > div > span > a > div > span").innerText;
+                songLink = document.querySelector("#root > div.zm-section.zm-layout.has-player > div.zm-section.now-playing-bar > div > div > div.player-controls-left.level-left > div > div > div.media-content > div > div > span > a").href;
+                songAuthors = document.querySelector("#root > div.zm-section.zm-layout.has-player > div.zm-section.now-playing-bar > div > div > div.player-controls-left.level-left > div > div > div.media-content > h3").innerText;
+                artworkLink = document.querySelector("#root > div.zm-section.zm-layout.has-player > div.zm-section.now-playing-bar > div > div > div.player-controls-left.level-left > div > div > div.media-left > a > div > div > figure > img").src;
+            }
         }
         if (lastPlaying !== playing || lastSong !== title || Math.abs(Date.now() - lastTimeStamp - elapsed) >= 1000) {
             lastPlaying = playing;
@@ -54,7 +75,14 @@ function refreshInfo() {
                 button1Text: "Nghe trên Zing MP3",
                 button1Url: songLink,
             };
-            if (!playing) {
+            if (artistArtworkLink && playing) {
+                data.smallImage = artistArtworkLink;
+                data.smallText = mainSongAuthor;
+                data.type = ActivityType.Watching;
+                data.name = "Zing MP3 MV";
+                data.button1Text = "Xem MV trên Zing MP3";
+            }
+            else if (!playing) {
                 data.smallImage = SmallIcons.paused;
                 data.smallText = "Paused";
             }
