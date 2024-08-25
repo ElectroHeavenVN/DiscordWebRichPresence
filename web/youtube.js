@@ -43,7 +43,7 @@ function refreshInfo() {
             title = shortsVideoElement.querySelector("reel-player-header-renderer > h2").innerText;
         else if (originalTitleElement != null) {
             var dearrowTitleElement = document.querySelector(".cbCustomTitle");
-            if (dearrowTitleElement != null && dearrowTitleElement.style.display != "none")
+            if (dearrowTitleElement != null && dearrowTitleElement.style.display != "none" && dearrowTitleElement.innerText !== "")
                 title = dearrowTitleElement.innerText;
             else if (originalTitleElement.style.display != "none")
                 title = originalTitleElement.innerText;
