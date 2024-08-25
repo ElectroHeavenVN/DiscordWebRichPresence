@@ -63,7 +63,7 @@ function refreshInfo() {
     var timePassed = Number(progressBar.value);
     var duration = Number(progressBar.max);
     playing = document.querySelector('button[data-testid="control-button-playpause"] path').getAttribute('d') === "M2.7 1a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7H2.7zm8 0a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7h-2.6z";
-    if (lastPlaying !== playing || lastSongName !== songName || Math.abs(Date.now() - lastTimeStamp - timePassed) >= 1000) {
+    if (lastPlaying !== playing || lastSongName !== songName || (playing && Math.abs(Date.now() - lastTimeStamp - timePassed) >= 1000)) {
         lastPlaying = playing;
         lastSongName = songName;
         lastTimeStamp = Date.now() - timePassed;

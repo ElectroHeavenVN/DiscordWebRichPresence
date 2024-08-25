@@ -39,7 +39,7 @@ function refreshInfo() {
 			else
 				artworkLink = artworkLink.substring(5, artworkLink.length - 2);
 		}
-		if (lastPlaying !== playing || lastSong !== title || Math.abs(Date.now() - lastTimeStamp - timePassed) >= 1000) {
+		if (lastPlaying !== playing || lastSong !== title || (playing && Math.abs(Date.now() - lastTimeStamp - timePassed) >= 1000)) {
 			lastPlaying = playing;
 			lastSong = title;
 			var timeEnd = 0;

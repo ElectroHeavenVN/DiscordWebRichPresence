@@ -29,9 +29,9 @@ function refreshInfo() {
             }
             return;
         }
-        var elapsed = Math.round(videoPlayer.currentTime * 1000)
+        var timePassed = Math.round(videoPlayer.currentTime * 1000)
         var total = Math.round(videoPlayer.duration * 1000)
-        if (total == NaN || elapsed == NaN)
+        if (total == NaN || timePassed == NaN)
             return;
         var authors = document.querySelectorAll(".style-scope ytmusic-player-bar .subtitle a");
         if (authors.length == 0)
@@ -50,11 +50,11 @@ function refreshInfo() {
         var thumbnailLink = document.querySelector(".ytmusic-player-bar img").src;
         var timeEnd = 0;
         if (playing)
-            timeEnd = Date.now() - elapsed + total;
-        if (lastPlaying !== playing || lastTitle !== title || Math.abs(Date.now() - lastTimeStamp - elapsed) >= 1000) {
+            timeEnd = Date.now() - timePassed + total;
+        if (lastPlaying !== playing || lastTitle !== title || (playing && Math.abs(Date.now() - lastTimeStamp - timePassed) >= 1000)) {
             lastPlaying = playing;
             lastTitle = title;
-            lastTimeStamp = Date.now() - elapsed;
+            lastTimeStamp = Date.now() - timePassed;
 
             data = {
                 applicationId: appId,

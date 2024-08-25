@@ -117,7 +117,6 @@ browser.runtime.onConnect.addListener(port => {
 				if (webPorts.length > 0) {
 					webPorts.forEach(webPort => {
 						webPort.postMessage({
-							listen: false,
 							state: status.state
 						});
 					});
@@ -126,7 +125,6 @@ browser.runtime.onConnect.addListener(port => {
 			if (webPorts.length > 0) {
 				webPorts.forEach(webPort => {
 					webPort.postMessage({
-						listen: true,
 						state: status.state
 					});
 				});
@@ -174,7 +172,6 @@ browser.runtime.onConnect.addListener(port => {
 					webPorts.splice(index, 1);
 			})
 			port.postMessage({
-				listen: true,
 				state: status.state
 			});
 		}
@@ -212,7 +209,6 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 					});
 					webPorts.forEach(webPort => {
 						webPort.postMessage({
-							listen: true,
 							state: request.state
 						});
 					});

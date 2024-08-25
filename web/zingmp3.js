@@ -5,6 +5,7 @@ var lastSong = "";
 var lastTimeStamp = 0;
 var sentReset = false;
 var lastMVLink = "";
+var lastTimeEndEqualZero = true;
 
 function refreshInfo() {
     if (listening) {
@@ -28,10 +29,10 @@ function refreshInfo() {
             }
             return;
         }
-        let elapsed = 0;
+        let timePassed = 0;
         let total = 0;
         if (videoPlayers.length > 0) {
-            elapsed = Math.round(videoPlayers[0].currentTime * 1000);
+            timePassed = Math.round(videoPlayers[0].currentTime * 1000);
             total = Math.round(videoPlayers[0].duration * 1000);
             playing = !videoPlayers[0].paused;
             title = document.querySelector("#video-scroll .media-content .title").innerText;
@@ -46,7 +47,7 @@ function refreshInfo() {
             var mainSongAuthor = document.querySelector("#video-scroll .media-content .subtitle.is-one-line a").innerText;
         }
         else if (audioPlayers.length > 0) {
-            elapsed = Math.round(audioPlayers[0].currentTime * 1000);
+            timePassed = Math.round(audioPlayers[0].currentTime * 1000);
             total = Math.round(audioPlayers[0].duration * 1000);
             if (document.querySelector("#root > div.zm-section.zm-layout.has-player > div.zm-section.now-playing-bar > div") != null) {
                 playing = !audioPlayers[0].paused;
@@ -56,13 +57,14 @@ function refreshInfo() {
                 artworkLink = document.querySelector("#root > div.zm-section.zm-layout.has-player > div.zm-section.now-playing-bar > div > div > div.player-controls-left.level-left > div > div > div.media-left > a > div > div > figure > img").src;
             }
         }
-        if (lastPlaying !== playing || lastSong !== title || Math.abs(Date.now() - lastTimeStamp - elapsed) >= 1000) {
+        var timeEnd = 0;
+        if (playing)
+            timeEnd = Date.now() - timePassed + total;
+        if (lastPlaying !== playing || lastSong !== title || lastTimeEndEqualZero != (timeEnd == 0) || (playing && Math.abs(Date.now() - lastTimeStamp - timePassed) >= 1000)) {
             lastPlaying = playing;
             lastSong = title;
-            lastTimeStamp = Date.now() - elapsed;
-            var timeEnd = 0;
-            if (playing)
-                timeEnd = Date.now() - elapsed + total;
+            lastTimeEndEqualZero = timeEnd == 0;
+            lastTimeStamp = Date.now() - timePassed;
             data = {
                 applicationId: appId,
                 type: ActivityType.Listening,

@@ -38,7 +38,7 @@ function refreshInfo() {
         songLink = currentSong.childNodes[0].href;
         songAuthors = currentSong.childNodes[1].innerText;
         artworkLink = getElementByXpath('/html/body/div/div[5]/div/div[1]/div/div[1]/div[1]/div/div/div/img').src;
-        if (lastPlaying !== playing || lastSong !== title || Math.abs(Date.now() - lastTimeStamp - timePassed) >= 1000) {
+        if (lastPlaying !== playing || lastSong !== title || (playing && Math.abs(Date.now() - lastTimeStamp - timePassed) >= 1000)) {
             lastPlaying = playing;
             lastSong = title;
             lastTimeStamp = Date.now() - timePassed;

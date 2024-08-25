@@ -27,7 +27,7 @@ function refreshInfo() {
             songAuthorLink = document.querySelector(".playbackSoundBadge__titleContextContainer.sc-mr-3x > a").href;
             artworkLink = window.getComputedStyle(document.querySelector(".playControls__elements > div.playControls__soundBadge.sc-ml-3x > div > a > div > span"), false).backgroundImage.slice(4, -1).replace(/"/g, "");
         }
-        if (lastPlaying !== playing || lastSong !== song || Math.abs(Date.now() - lastTimeStamp - timePassed) >= 1000) {
+        if (lastPlaying !== playing || lastSong !== song || (playing && Math.abs(Date.now() - lastTimeStamp - timePassed) >= 1000)) {
             lastPlaying = playing;
             lastSong = song;
             lastTimeStamp = Date.now() - timePassed;

@@ -28,7 +28,7 @@ function refreshInfo()
     songAuthorProfilePic = document.querySelector(".artists-bio-pic a").href;
     songAuthorLink = document.querySelector(".albumTitle span a").href;
     artworkLink = document.querySelector("#tralbumArt a").href;
-    if (lastPlaying !== playing || lastSong !== song || Math.abs(Date.now() - lastTimeStamp - timePassed) >= 1000) {
+    if (lastPlaying !== playing || lastSong !== song || (playing && Math.abs(Date.now() - lastTimeStamp - timePassed) >= 1000)) {
         lastPlaying = playing;
         lastSong = song;
         lastTimeStamp = Date.now() - timePassed;

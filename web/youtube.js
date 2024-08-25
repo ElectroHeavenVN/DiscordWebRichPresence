@@ -39,15 +39,15 @@ function refreshInfo() {
         if (document.querySelector(".html5-video-player") != null)
             playing = document.querySelector(".html5-video-player#" + (isYTShorts ? "shorts-player" : "movie_player")).classList.contains("playing-mode");
         var originalTitleElement = document.querySelector("#info .title");
-        if (originalTitleElement != null) {
+        if (isYTShorts && shortsVideoElement != null)
+            title = shortsVideoElement.querySelector("reel-player-header-renderer > h2").innerText;
+        else if (originalTitleElement != null) {
             var dearrowTitleElement = document.querySelector(".cbCustomTitle");
             if (dearrowTitleElement != null && dearrowTitleElement.style.display != "none")
                 title = dearrowTitleElement.innerText;
             else if (originalTitleElement.style.display != "none")
                 title = originalTitleElement.innerText;
         }
-        else if (isYTShorts && shortsVideoElement != null)
-            title = shortsVideoElement.querySelector("reel-player-header-renderer > h2").innerText;
         var isLiveStreaming = document.querySelector("#movie_player > div.ytp-chrome-bottom > div.ytp-chrome-controls > div.ytp-left-controls > div.ytp-time-display.notranslate.ytp-live > button") != null;
         var videoPlayer = document.querySelector(".html5-video-player#" + (isYTShorts ? "shorts-player" : "movie_player") + " video");
         if (videoPlayer == null)
