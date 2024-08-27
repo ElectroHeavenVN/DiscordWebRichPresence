@@ -119,52 +119,11 @@
 		},
 		{
 			"matches": [
-				"https://aniwave.to/*",
-				"https://aniwave.ws/*",
-				"https://aniwave.vc/*",
-				"https://aniwave.li/*"
-			],
-			"all_frames": true,
-			"js": [
-				"web/aniwave.js",
-				"content_script.js"
-			],
-			"run_at": "document_idle"
-		},
-		{
-			"matches": [
-				"https://lite.aniwave.to/*",
-				"https://lite.aniwave.ws/*",
-				"https://lite.aniwave.vc/*",
-				"https://lite.aniwave.li/*"
-			],
-			"all_frames": true,
-			"js": [
-				"web/aniwavelite.js",
-				"content_script.js"
-			],
-			"run_at": "document_idle"
-		},
-		{
-			"matches": [
 				"https://hianime.to/*"
 			],
 			"all_frames": true,
 			"js": [
 				"web/hianime.js",
-				"content_script.js"
-			],
-			"run_at": "document_idle"
-		},
-		{
-			"matches": [
-				"https://anix.to/*",
-				"https://anix.ac/*",
-				"https://anix.vc/*"
-			],
-			"all_frames": true,
-			"js": [
-				"web/anix.js",
 				"content_script.js"
 			],
 			"run_at": "document_idle"

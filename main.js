@@ -205,10 +205,11 @@ document.addEventListener('DOMContentLoaded', () => {
             settingsImg.style.display = "";
     }
     dependentSwitches.forEach(dependentSwitch => {
-        if (dependentSwitch.id === 'sw-aniwatch') {
-            dependentSwitch.disabled = true;
+        if (dependentSwitch.classList.contains('rest-in-peace')) {
             dependentSwitch.checked = false;
+            dependentSwitch.disabled = true;
             dependentSwitch.closest('.switch').classList.toggle('disabled', true);
+            localStorage.setItem(dependentSwitch.id, dependentSwitch.checked);
             return;
         }
         dependentSwitch.disabled = !masterSwitch.checked;
@@ -228,9 +229,9 @@ document.addEventListener('DOMContentLoaded', () => {
         else
             settingsImg.style.display = "none";
         dependentSwitches.forEach(switchElem => {
-            if (switchElem.id === 'sw-aniwatch') {
-                switchElem.disabled = true;
+            if (switchElem.classList.contains('rest-in-peace')) {
                 switchElem.checked = false;
+                switchElem.disabled = true;
                 switchElem.closest('.switch').classList.toggle('disabled', true);
                 return;
             }
