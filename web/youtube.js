@@ -40,7 +40,7 @@ function refreshInfo() {
             playing = document.querySelector(".html5-video-player#" + (isYTShorts ? "shorts-player" : "movie_player")).classList.contains("playing-mode");
         var originalTitleElement = document.querySelector("#info .title");
         if (isYTShorts && shortsVideoElement != null)
-            title = shortsVideoElement.querySelector("reel-player-header-renderer > h2").innerText;
+            title = shortsVideoElement.querySelector(".YtShortsVideoTitleViewModelShortsVideoTitle").innerText;
         else if (originalTitleElement != null) {
             var dearrowTitleElement = document.querySelector(".cbCustomTitle");
             if (dearrowTitleElement != null && dearrowTitleElement.style.display != "none" && dearrowTitleElement.innerText !== "")
@@ -59,12 +59,18 @@ function refreshInfo() {
                 return;
         }
         var videoOwner = document.querySelector("#owner > ytd-video-owner-renderer");
-        if (isYTShorts)
-            videoOwner = shortsVideoElement.querySelector("#channel-info");
         if (videoOwner != null) {
             channelProfilePicture = videoOwner.querySelector("#img").src;
             channelLink = videoOwner.querySelector("#channel-name a").href;
             channelName = videoOwner.querySelector("#channel-name a").innerText;
+        }
+        if (isYTShorts) {
+            videoOwner = shortsVideoElement.querySelector(".YtReelMetapanelViewModelHost");
+            if (videoOwner != null) {
+                channelProfilePicture = videoOwner.querySelector("img").src;
+                channelLink = videoOwner.querySelector(".YtReelChannelBarViewModelHost a").href;
+                channelName = videoOwner.querySelector(".YtReelChannelBarViewModelHost a").innerText;
+            }
         }
         if (isYTShorts) {
             videoId = location.pathname.substring(location.pathname.lastIndexOf('/') + 1);
