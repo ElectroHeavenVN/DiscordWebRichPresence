@@ -58,18 +58,21 @@ function refreshInfo() {
             if (total == NaN || elapsed == NaN)
                 return;
         }
-        var videoOwner = document.querySelector("#owner > ytd-video-owner-renderer");
-        if (videoOwner != null) {
-            channelProfilePicture = videoOwner.querySelector("#img").src;
-            channelLink = videoOwner.querySelector("#channel-name a").href;
-            channelName = videoOwner.querySelector("#channel-name a").innerText;
-        }
+        var videoOwner;
         if (isYTShorts) {
             videoOwner = shortsVideoElement.querySelector(".YtReelMetapanelViewModelHost");
             if (videoOwner != null) {
                 channelProfilePicture = videoOwner.querySelector("img").src;
                 channelLink = videoOwner.querySelector(".YtReelChannelBarViewModelHost a").href;
                 channelName = videoOwner.querySelector(".YtReelChannelBarViewModelHost a").innerText;
+            }
+        }
+        else {
+            videoOwner = document.querySelector("#owner > ytd-video-owner-renderer");
+            if (videoOwner != null) {
+                channelProfilePicture = videoOwner.querySelector("#img").src;
+                channelLink = videoOwner.querySelector("#channel-name a").href;
+                channelName = videoOwner.querySelector("#channel-name a").innerText;
             }
         }
         if (isYTShorts) {
