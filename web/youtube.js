@@ -121,6 +121,8 @@ function refreshInfo() {
         if (!playing) {
             data.smallImage = SmallIcons.paused;
             data.smallText = "Paused";
+            data.timeStart = undefined;
+                data.timeEnd = undefined;
         }
         setTimeout(() => {
             browser.runtime.sendMessage({

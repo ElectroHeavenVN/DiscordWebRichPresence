@@ -1,5 +1,6 @@
 let discordPort = null;
 let webPorts = [];
+let iframePorts = [];
 
 if (typeof browser === "undefined") {
 	var browser = chrome;
@@ -117,6 +118,7 @@ browser.runtime.onConnect.addListener(port => {
 				if (webPorts.length > 0) {
 					webPorts.forEach(webPort => {
 						webPort.postMessage({
+							action: 'setState',
 							state: status.state
 						});
 					});
@@ -125,6 +127,7 @@ browser.runtime.onConnect.addListener(port => {
 			if (webPorts.length > 0) {
 				webPorts.forEach(webPort => {
 					webPort.postMessage({
+						action: 'setState',
 						state: status.state
 					});
 				});
@@ -172,7 +175,35 @@ browser.runtime.onConnect.addListener(port => {
 					webPorts.splice(index, 1);
 			})
 			port.postMessage({
+				action: 'setState',
 				state: status.state
+			});
+		}
+		else if (port.name.startsWith("iframe_")) {
+			console.log("New connection from " + port.name);
+			var index = iframePorts.map(o => o.name).indexOf(port.name);
+			if (index == -1) {
+				console.log(`Add ${port.name} to the list`);
+				iframePorts.push(port);
+			}
+			else {
+				console.log(`${port.name} already exists in the list, replace it`);
+				iframePorts[index] = port;
+			}
+			port.onDisconnect.addListener(() => {
+				console.info(port.name + " disconnected");
+				var index = iframePorts.map(o => o.name).indexOf(port.name);
+				if (index != -1)
+					iframePorts.splice(index, 1);
+			})
+			port.onMessage.addListener(msg => {
+				var index = webPorts.map(o => o.name).indexOf(msg.answerTo);
+				if (index != -1)
+					webPorts[index].postMessage({
+						action: 'iframeResult',
+						data: msg.result,
+						receiver: msg.answerTo
+					});
 			});
 		}
 		else {
@@ -201,7 +232,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 					for (let i = currentActivities.length - 1; i <= 0; i--) {
 						if (request.state.find(e => e.id == currentActivities[i].id).enabled)
 							filteredActivities.push(currentActivities[i].activity);
-						else 
+						else
 							currentActivities.splice(i, 1);
 					}
 					SendMessageToDiscordTab({
@@ -209,6 +240,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 					});
 					webPorts.forEach(webPort => {
 						webPort.postMessage({
+							action: 'setState',
 							state: request.state
 						});
 					});
@@ -291,6 +323,22 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 					data: currentActivities
 				});
 				break;
+			case 'getIframeInfo':
+				if (iframePorts.length == 0)
+					break;
+				iframePorts.forEach(iframePort => {
+					try {
+						if (iframePort.name.startsWith("iframe_" + request.iframe_href)) {
+							iframePort.postMessage({
+								action: 'requestIFrameInfo',
+								type: request.type,
+								caller: request.name,
+								href: request.iframe_href,
+							});
+						}
+					}
+					catch { }
+				});
 			case 'currentActivities':
 				break;
 			default:

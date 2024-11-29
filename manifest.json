@@ -15,10 +15,21 @@
 	},
     "content_scripts": [
 		{
+			"matches": ["*://*/*"],
+			"all_frames": true,
+			"js": [
+				"iframe-helper.js"
+			],
+			"run_at": "document_idle"
+		},
+		{
 			"matches": [
 				"https://discord.com/channels/*",
+				"https://discord.com/app",
 				"https://ptb.discord.com/channels/*",
-				"https://canary.discord.com/channels/*"
+				"https://ptb.discord.com/app",
+				"https://canary.discord.com/channels/*",
+				"https://canary.discord.com/app"
 			],
 			"all_frames": true,
 			"js": ["discord.js"],
@@ -28,8 +39,11 @@
 			"world": "MAIN",
 			"matches": [
 				"https://discord.com/channels/*",
+				"https://discord.com/app",
 				"https://ptb.discord.com/channels/*",
-				"https://canary.discord.com/channels/*"
+				"https://ptb.discord.com/app",
+				"https://canary.discord.com/channels/*",
+				"https://canary.discord.com/app"
 			],
 			"all_frames": true,
 			"js": ["discord-main-world.js"],

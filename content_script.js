@@ -32,5 +32,6 @@ setTimeout(() => {
     }, 3000);
 }, 1000);
 port.onMessage.addListener(msg => {
-    listening = msg.state.find(e => e.id == id).enabled;
+    if (msg.action == 'setState') 
+        listening = msg.state.find(e => e.id == id).enabled;
 });

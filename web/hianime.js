@@ -5,17 +5,33 @@ var lastTitle = "";
 var lastEp = "";
 var lastState = "";
 var sentReset = false;
+var lastTimeStamp = 0;
 
-function refreshInfo() {
-    let playing = false,
-        title = "",
-        currentEp = "",
-        link = "",
-        currentState = "",
-        cover = "";
-    if (listening) {
-        if (location.pathname.includes("/watch/")) {
-            playing = document.querySelector("#iframe-embed") != null;
+setTimeout(() => {
+    port.onMessage.addListener(msg => {
+        if (msg.action !== 'iframeResult' || !msg.data || !msg.data.playing)
+            return;
+        let playing = msg.data.playing,
+            title = "",
+            currentEp = "",
+            link = "",
+            currentState = "",
+            cover = "",
+            timePassed = 0,
+            total = 0;
+        if (listening) {
+            if (!location.pathname.includes("/watch/")) {
+                if (!sentReset) {
+                    data = false;
+                    try {
+                        browser.runtime.sendMessage({
+                            id,
+                            action: "reset"
+                        });
+                        sentReset = true;
+                    } catch (e) { }
+                }
+            }
             title = document.querySelector("#ani_detail div.anis-watch-wrap div.anis-watch-detail div.anisc-detail h2 a").title;
             var eps = document.querySelector("#detail-ss-list > div").children;
             var epsRange = null;
@@ -55,25 +71,33 @@ function refreshInfo() {
                 }
             }
             cover = document.querySelector("div.anis-watch-detail div.anisc-poster img").src;
+            if (currentState === "") {
+                currentState = currentEp;
+                currentEp = "";
+            }
+            if (/^Episode \d+$/.test(currentEp)) 
+                currentEp = "Season 1, " + currentEp;
         }
-        if (currentState === "") {
-            currentState = currentEp;
-            currentEp = "";
+        var timeEnd = 0;
+        if (msg.data.playing) {
+            timePassed = Math.round(msg.data.currentTime * 1000);
+            total = Math.round(msg.data.duration * 1000);
+            timeEnd = Date.now() - timePassed + total;
         }
-    }
-    if (lastPlaying !== playing || lastTitle !== title || lastEp !== currentEp || lastState !== currentState) {
-        lastPlaying = playing;
-        lastTitle = title;
-        lastEp = currentEp;
-        lastState = currentState;
-        if (playing) {
-            data = {
+        if (lastPlaying !== playing || lastTitle !== title || lastEp !== currentEp || lastState !== currentState || (playing && Math.abs(Date.now() - lastTimeStamp - timePassed) >= 1000)) {
+            lastPlaying = playing;
+            lastTitle = title;
+            lastEp = currentEp;
+            lastState = currentState;
+            lastTimeStamp = Date.now() - timePassed;
+            var data = {
                 applicationId: appId,
                 type: ActivityType.Watching,
                 name: "HiAnime",
                 details: title,
                 state: currentState,
-                timeStart: Date.now(),
+                timeStart: lastTimeStamp,
+                timeEnd: timeEnd,
                 largeImage: cover,
                 largeText: currentEp,
                 smallImage: 'https://cdn.discordapp.com/app-icons/1223343776941211798/04251a85dc268c18e889f9ef2c7f3a49.png',
@@ -83,6 +107,16 @@ function refreshInfo() {
                 button2Text: "Official HiAnime site",
                 button2Url: window.location.origin,
             };
+            if (!playing) {
+                data.smallImage = SmallIcons.paused;
+                data.smallText = "Paused";
+                data.timeStart = undefined;
+                data.timeEnd = undefined;
+            }
+            // else {
+            //     data.smallImage = SmallIcons.playing;
+            //     data.smallText = "Playing";
+            // }
             sentReset = false;
             setTimeout(() => {
                 browser.runtime.sendMessage({
@@ -90,7 +124,14 @@ function refreshInfo() {
                     status: data
                 });
             }, 10);
-        } else if (!sentReset) {
+        }
+    });
+}, 1000);
+
+function refreshInfo() {
+    var iframe = document.querySelector("#iframe-embed");
+    if (iframe === null) {
+        if (!sentReset) {
             data = false;
             try {
                 browser.runtime.sendMessage({
@@ -100,5 +141,13 @@ function refreshInfo() {
                 sentReset = true;
             } catch (e) { }
         }
+        return;
     }
+    browser.runtime.sendMessage(
+        {
+            action: "getIframeInfo",
+            type: 'getVideoInfo',
+            iframe_href: iframe.src,
+            name: port.name,
+        });
 }
