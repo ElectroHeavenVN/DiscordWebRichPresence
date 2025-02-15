@@ -21,7 +21,12 @@ port.onMessage.addListener(msg => {
 		}
 	}
 	else if (Array.isArray(msg.activities)) {
-		document.dispatchEvent(new CustomEvent('wrp', { detail: msg.activities }));
+		let eventDetails;
+		if (typeof cloneInto != 'undefined') 
+			eventDetails = cloneInto(msg.activities, document.defaultView);
+		else 
+			eventDetails = msg.activities;
+		document.dispatchEvent(new CustomEvent('wrp', { detail: eventDetails }));
 	}
 })
 port.onDisconnect.addListener(() => {
