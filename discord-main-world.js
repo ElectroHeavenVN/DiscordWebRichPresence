@@ -15,6 +15,8 @@ var delayOtherActivities = false;
 var gotReponseFromBGWorker = false;
 var cachedExternalImages = [];
 
+var token = "";
+
 const originalWebSocket = window.WebSocket;
 const originalWebSocketProperties = ["binaryType", "bufferedAmount", "extensions", "onclose", "onmessage", "onopen", "protocol", "readyState", "url"];
 
@@ -40,6 +42,10 @@ window.WebSocket = function (u, p) {
 
 window.WebSocket.prototype.send = function (d) {
     var cancelSend = false;
+    if (d.substr(0, 8) === '{"op":2,') {
+            const j = JSON.parse(d);
+            token = j.d.token;
+    }
     if (d.substr(0, 8) === '{"op":3,') {
         if (this.downstreamSocket === discordGateway) {
             const j = JSON.parse(d);
@@ -291,16 +297,7 @@ async function GetActivities() {
 }
 
 async function GetExternalAssetsLink(appId, links) {
-    let token = null;
-    try {
-        token = (window.webpackChunkdiscord_app.push([
-            [''], {},
-            e => {
-                m = [];
-                for (let c in e.c) m.push(e.c[c])
-            }
-        ]), m).find(m => m?.exports?.default?.getToken !== void 0).exports.default.getToken();
-    } catch (e) {
+    if (token === "") {
         return [];
     }
     return await (await fetch('https://discord.com/api/v9/applications/' + appId + '/external-assets', {
