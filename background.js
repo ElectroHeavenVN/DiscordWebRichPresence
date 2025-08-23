@@ -148,9 +148,11 @@ browser.runtime.onConnect.addListener(port => {
 						if (status.state.find(e => e.id == currentActivities[i].id).enabled)
 							filteredActivities.push(currentActivities[i].activity);
 					}
-					SendMessageToDiscordTab({
-						activities: filteredActivities
-					});
+					setTimeout(() => {
+						SendMessageToDiscordTab({
+							activities: filteredActivities
+						});
+					}, 5000);
 					sendFirstMessageCount++;
 					if (sendFirstMessageCount >= 3)
 						clearInterval(intervalSendFirstMessage);
@@ -302,7 +304,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 						activity.activity.flags ^= ActivityFlags.Embedded;
 					if (changeListeningToSp && activity.activity.type == ActivityType.Listening && activity.activity.name !== "Spotify") {
 						activity.activity.details = '[' + activity.activity.name + '] ' + activity.activity.details;
-						activity.activity.state = activity.activity.state.replace('by ', '');
+						activity.activity.state = activity.activity.state;
 						activity.activity.name = "Spotify";
 						if (activity.activity.button1Url)
 							activity.activity.contextUri = activity.activity.syncID = activity.activity.button1Url;
@@ -380,7 +382,7 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 						activity.activity.flags ^= ActivityFlags.Embedded;
 					if (changeListeningToSp && activity.activity.type == ActivityType.Listening && activity.activity.name !== "Spotify") {
 						activity.activity.details = '[' + activity.activity.name + '] ' + activity.activity.details;
-						activity.activity.state = activity.activity.state.replace('by ', '');
+						activity.activity.state = activity.activity.state;
 						activity.activity.name = "Spotify";
 						if (activity.activity.button1Url)
 							activity.activity.contextUri = activity.activity.syncID = activity.activity.button1Url;

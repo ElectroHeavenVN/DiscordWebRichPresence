@@ -38,7 +38,7 @@ function refreshInfo()
                 type: ActivityType.Listening,
                 name: "Bandcamp",
                 details: song,
-                state: "by " + songAuthor,
+                state: songAuthor,
                 largeImage: artworkLink,
                 smallImage: songAuthorProfilePic,
                 smallText: songAuthor,

@@ -106,7 +106,7 @@ function refreshInfo() {
             type: ActivityType.Watching,
             name: "YouTube" + (isYTShorts ? " Shorts" : ""),
             details: title,
-            state: "by " + channelName,
+            state: channelName,
             timeEnd: timeEnd,
             timeStart: lastTimeStamp,
             largeImage: "https://i.ytimg.com/vi/" + videoId + "/hqdefault.jpg",

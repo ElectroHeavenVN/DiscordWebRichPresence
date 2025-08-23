@@ -61,7 +61,7 @@ function refreshInfo() {
                 type: ActivityType.Listening,
                 name: "YouTube Music",
                 details: title,
-                state: "by " + authorsText,
+                state: authorsText,
                 largeImage: thumbnailLink,
                 timeStart: lastTimeStamp,
                 timeEnd: timeEnd,

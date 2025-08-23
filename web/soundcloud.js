@@ -39,7 +39,7 @@ function refreshInfo() {
                 type: ActivityType.Listening,
                 name: "SoundCloud",
                 details: song,
-                state: "by " + songAuthor,
+                state: songAuthor,
                 largeImage: artworkLink,
                 timeStart: lastTimeStamp,
                 timeEnd: timeEnd,

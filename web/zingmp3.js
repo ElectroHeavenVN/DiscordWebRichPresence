@@ -70,7 +70,7 @@ function refreshInfo() {
                 type: ActivityType.Listening,
                 name: "Zing MP3",
                 details: title,
-                state: "by " + songAuthors,
+                state: songAuthors,
                 largeImage: artworkLink,
                 timeStart: lastTimeStamp,
                 timeEnd: timeEnd,
