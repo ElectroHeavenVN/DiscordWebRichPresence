@@ -79,7 +79,7 @@ function refreshInfo() {
                     channelProfilePicture = videoOwnerRenderer.avatarStack.avatarStackViewModel.avatars[0].avatarViewModel.image.sources[0].url;
                     channelName = videoOwnerRenderer.attributedTitle.content;
                     let firstChannel = videoOwnerRenderer.navigationEndpoint.showDialogCommand.panelLoadingStrategy.inlineContent.dialogViewModel.customContent.listViewModel.listItems[0];
-                    channelLink = "https://www.youtube.com/" + firstChannel.listItemViewModel.title.commandRuns[0].onTap.innertubeCommand.browseEndpoint.canonicalBaseUrl;
+                    channelLink = "https://www.youtube.com" + firstChannel.listItemViewModel.title.commandRuns[0].onTap.innertubeCommand.browseEndpoint.canonicalBaseUrl;
                     channelNameSmallText = firstChannel.listItemViewModel.title.content;
                 }
                 else {
