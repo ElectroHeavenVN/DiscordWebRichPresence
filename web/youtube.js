@@ -29,6 +29,7 @@ function refreshInfo() {
         elapsed = 0,
         total = 0,
         channelName = "",
+        channelNameSmallText = "",
         channelLink = "",
         channelProfilePicture = "",
         videoId = "",
@@ -64,15 +65,28 @@ function refreshInfo() {
             if (videoOwner != null) {
                 channelProfilePicture = videoOwner.querySelector("img").src;
                 channelLink = videoOwner.querySelector(".ytReelChannelBarViewModelHost a").href;
-                channelName = videoOwner.querySelector(".ytReelChannelBarViewModelHost a").innerText;
+                channelName = channelNameSmallText = videoOwner.querySelector(".ytReelChannelBarViewModelHost a").innerText;
             }
         }
         else {
             videoOwner = document.querySelector("#owner > ytd-video-owner-renderer");
             if (videoOwner != null) {
-                channelProfilePicture = videoOwner.querySelector("#img").src;
-                channelLink = videoOwner.querySelector("#channel-name a").href;
-                channelName = videoOwner.querySelector("#channel-name a").innerText;
+                let isCollaboration = videoOwner.querySelector('a').href === '';
+                if (isCollaboration) {
+                    let ytInitialDataDef = Array.from(document.querySelectorAll('script')).find(el => el.textContent.trim().startsWith("var ytInitialData = ")).textContent.trim();
+                    let ytInitialData = JSON.parse(ytInitialDataDef.substring(19, ytInitialDataDef.length - 1));
+                    let videoOwnerRenderer = ytInitialData.contents.twoColumnWatchNextResults.results.results.contents[1].videoSecondaryInfoRenderer.owner.videoOwnerRenderer;
+                    channelProfilePicture = videoOwnerRenderer.avatarStack.avatarStackViewModel.avatars[0].avatarViewModel.image.sources[0].url;
+                    channelName = videoOwnerRenderer.attributedTitle.content;
+                    let firstChannel = videoOwnerRenderer.navigationEndpoint.showDialogCommand.panelLoadingStrategy.inlineContent.dialogViewModel.customContent.listViewModel.listItems[0];
+                    channelLink = "https://www.youtube.com/" + firstChannel.listItemViewModel.title.commandRuns[0].onTap.innertubeCommand.browseEndpoint.canonicalBaseUrl;
+                    channelNameSmallText = firstChannel.listItemViewModel.title.content;
+                }
+                else {
+                    channelProfilePicture = videoOwner.querySelector("#img").src;
+                    channelLink = videoOwner.querySelector("#channel-name a").href;
+                    channelName = channelNameSmallText = videoOwner.querySelector("#channel-name a").innerText;
+                }
             }
         }
         if (isYTShorts) {
@@ -112,7 +126,7 @@ function refreshInfo() {
             largeImage: "https://i.ytimg.com/vi/" + videoId + "/hqdefault.jpg",
             largeText: largeText,
             smallImage: channelProfilePicture,
-            smallText: channelName,
+            smallText: channelNameSmallText,
             button1Text: isLiveStreaming ? "Watch livestream on YouTube" : "Watch video on YouTube" + (isYTShorts ? " Shorts" : ""),
             button1Url: "https://www.youtube.com/" + (isYTShorts ? "shorts/" : "watch?v=") + videoId,
             button2Text: "View channel",
