@@ -80,6 +80,13 @@
 			"run_at": "document_idle"
 		},
 		{
+			"world": "MAIN",
+			"matches": ["https://www.youtube.com/*"],
+			"all_frames": true,
+			"js": ["web/youtube-main-world.js"],
+			"run_at": "document_start"
+		},
+		{
 			"matches": ["https://music.youtube.com/*"],
 			"all_frames": true,
 			"js": [
