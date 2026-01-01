@@ -141,7 +141,8 @@
 		},
 		{
 			"matches": [
-				"https://hianimez.to/*"
+				"https://hianimez.to/*",
+				"https://hianime.to/*"
 			],
 			"all_frames": true,
 			"js": [
