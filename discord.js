@@ -10,8 +10,8 @@ port.onMessage.addListener(msg => {
 			case "close":
 				closeOK = true;
 				break;
-			case "updateDelayOtherActivities":
-				document.dispatchEvent(new CustomEvent('updateDelayOtherActivities', { detail: { value: msg.value } }));
+			case "updateStatusDisplayType":
+				document.dispatchEvent(new CustomEvent('updateStatusDisplayType', { detail: { value: msg.value } }));
 				break;
 			case "resetActivities":
 				document.dispatchEvent(new CustomEvent('resetActivities'));
@@ -30,7 +30,7 @@ port.onMessage.addListener(msg => {
 	}
 })
 port.onDisconnect.addListener(() => {
-	console.info("port " + closeOK ? "closed" : "disconnected with error");
+	console.info("port " + (closeOK ? "closed" : "disconnected with error"));
 	if (closeOK) {
 		closeOK = false;
 	}

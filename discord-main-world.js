@@ -8,7 +8,7 @@
     var sendingActivity;
     var currentActivities = [];
     var currentActivitiesFromBGWorker = [];
-    var delayOtherActivities = false;
+    var statusDisplayType = 0;
     var gotReponseFromBGWorker = false;
     var cachedExternalImages = [];
 
@@ -54,6 +54,9 @@
                     otherActivities = j.d.activities;
                     if (gotReponseFromBGWorker) {
                         GetActivities().then(activities => {
+                            for (let i = 0; i < activities.length; i++) {
+                                activities[i].status_display_type = statusDisplayType;
+                            }
                             j.d.activities = activities;
                             d = JSON.stringify(j);
                             SendDataToDiscordWS(this.downstreamSocket, d);
@@ -79,8 +82,8 @@
         UpdateActivityData(msg.detail);
     });
 
-    document.addEventListener('updateDelayOtherActivities', function (msg) {
-        delayOtherActivities = msg.detail.value;
+    document.addEventListener('updateStatusDisplayType', function (msg) {
+        statusDisplayType = msg.detail.value;
     });
 
     document.addEventListener('resetActivities', function () {
@@ -95,23 +98,11 @@
             if (downstreamSocket === discordGateway) {
                 cancelSend = true;
                 var j = JSON.parse(data);
-                if (delayOtherActivities) {
-                    currentActivities = j.d.activities;
-                    downstreamSocket.send(data);
-                    setTimeout(() => {
-                        if (otherActivities.length > 0)
-                            j.d.activities = j.d.activities.concat(otherActivities);
-                        data = JSON.stringify(j);
-                        downstreamSocket.send(data);
-                    }, Math.floor(Math.random() * (7000 - 2000 + 1)) + 2000);
-                }
-                else {
-                    currentActivities = j.d.activities;
-                    if (otherActivities.length > 0)
-                        j.d.activities = j.d.activities.concat(otherActivities);
-                    data = JSON.stringify(j);
-                    downstreamSocket.send(data);
-                }
+                currentActivities = j.d.activities;
+                if (otherActivities.length > 0)
+                    j.d.activities = j.d.activities.concat(otherActivities);
+                data = JSON.stringify(j);
+                downstreamSocket.send(data);
             }
         }
         if (!cancelSend)
@@ -157,7 +148,7 @@
         var result = [];
         for (let i = 0; i < currentActivitiesFromBGWorker.length; i++) {
             var activityFromBGWorker = currentActivitiesFromBGWorker[i];
-            if ((typeof (activityFromBGWorker.applicationId) !== "string" || activityFromBGWorker.applicationId === null || activityFromBGWorker.applicationId.length === 0 || activityFromBGWorker.applicationId === "0") && activityFromBGWorker.name !== "Spotify")
+            if (typeof (activityFromBGWorker.applicationId) !== "string" || activityFromBGWorker.applicationId === null || activityFromBGWorker.applicationId.length === 0 || activityFromBGWorker.applicationId === "0")
                 continue;
             let activity = {
                 application_id: activityFromBGWorker.applicationId,
@@ -203,40 +194,14 @@
                     ]
                 };
 
-            if (activityFromBGWorker.name == "Spotify") {
-                if (typeof (activityFromBGWorker.contextUri) === "string" && activityFromBGWorker.contextUri !== null && activityFromBGWorker.contextUri.length > 0)
-                    activity.metadata.context_uri = activityFromBGWorker.contextUri;
-                if (typeof (activityFromBGWorker.albumID) === "string" && activityFromBGWorker.albumID !== null && activityFromBGWorker.contextUri.length > 0)
-                    activity.metadata.album_id = activityFromBGWorker.albumID;
-                if (typeof (activityFromBGWorker.artistIDs) === "object" && activityFromBGWorker.artistIDs !== null && activityFromBGWorker.artistIDs.length > 0)
-                    activity.metadata.artist_ids = activityFromBGWorker.artistIDs;
-                if (typeof (activityFromBGWorker.metadataType) === "object" && activityFromBGWorker.metadataType !== null && activityFromBGWorker.metadataType.length > 0)
-                    activity.metadata.type = activityFromBGWorker.metadataType;
-                let userID = "000000000000000000";
-                if (typeof (activity.party) !== 'undefined')
-                    activity.party.id = 'spotify:' + userID;
-                else
-                    activity.party = {
-                        id: 'spotify:' + userID
-                    };
-                if (typeof (activityFromBGWorker.syncID) === "string" && activityFromBGWorker.syncID !== null && activityFromBGWorker.syncID.length > 0)
-                    activity.sync_id = activityFromBGWorker.syncID;
-                else
-                    activity.sync_id = "0000000000000000000000";
-            }
-
             let links = [];
             if (typeof (activityFromBGWorker.largeImage) === "string" && activityFromBGWorker.largeImage !== null && activityFromBGWorker.largeImage.length > 0) {
-                if (activityFromBGWorker.largeImage.startsWith('spotify:'))
-                    activity.assets.large_image = activityFromBGWorker.largeImage;
-                else if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/(attachments|app-icons|app-assets)\//.test(activityFromBGWorker.largeImage))
+                if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/(attachments|app-icons|app-assets)\//.test(activityFromBGWorker.largeImage))
                     activity.assets.large_image = "mp:" + activityFromBGWorker.largeImage.replace(/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");
                 links.push(activityFromBGWorker.largeImage);
             }
             if (typeof (activityFromBGWorker.smallImage) === "string" && activityFromBGWorker.smallImage !== null && activityFromBGWorker.smallImage.length > 0) {
-                if (activityFromBGWorker.smallImage.startsWith('spotify:'))
-                    activity.assets.small_image = activityFromBGWorker.smallImage;
-                else if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/(attachments|app-icons|app-assets)\//.test(activityFromBGWorker.smallImage))
+                if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/(attachments|app-icons|app-assets)\//.test(activityFromBGWorker.smallImage))
                     activity.assets.small_image = "mp:" + activityFromBGWorker.smallImage.replace(/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");
                 links.push(activityFromBGWorker.smallImage);
             }
@@ -320,13 +285,6 @@
                     button1Url: activity.button1Url,
                     button2Text: activity.button2Text,
                     button2Url: activity.button2Url,
-                }
-                if (activity.name == "Spotify") {
-                    activityData.contextUri = activity.contextUri;
-                    activityData.albumID = activity.albumID;
-                    activityData.artistIDs = activity.artistIDs;
-                    activityData.syncID = activity.syncID;
-                    activityData.metadataType = activity.metadataType;
                 }
                 currentActivitiesFromBGWorker.push(activityData);
             }

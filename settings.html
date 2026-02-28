@@ -12,9 +12,9 @@
         <label class="popup-label">Settings</label>
     </div>
     <div class="separator"></div>
-    <div class="switch-container">
-        <label class="switch-label">Enable Join button</label>
-        <div class="switch-container-right">
+    <div class="container">
+        <label>Enable Join button</label>
+        <div class="container-right">
             <img id="helpImg" src="img/help.png" alt="Help" title="Show the Join button (this button will be the first button and will be disabled).">
             <label class="switch">
                 <input type="checkbox" id="enable-join-button-switch">
@@ -22,17 +22,15 @@
             </label>
         </div>
     </div>
-    <div class="switch-container">
-        <label class="switch-label">Delay other activities</label>
-        <div class="switch-container-right">
-            <img id="helpImg" src="img/help.png" alt="Help" title="Send your other activities after a few seconds to make sure that the main activity will be displayed in your profile instead of in the activities tab.">
-            <label class="switch">
-                <input type="checkbox" id="delay-other-activities-switch">
-                <span class="slider"></span>
-            </label>
-        </div>
+    <div class="container">
+        <label class="select-label">Status display type</label>
+        <div class="container-right">
+            <select id="status-display-type-select">
+                <option value="0">Name</option>
+                <option value="1">State</option>
+                <option value="2">Details</option>
+            </select>
     </div>
-    
     <script src="settings.js"></script>
 </body>
 

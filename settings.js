@@ -5,13 +5,13 @@ if (typeof browser === "undefined") {
 document.addEventListener('DOMContentLoaded', () => {
     const backImg = document.getElementById('backImg');
     const enableJoinButtonSwitch = document.getElementById('enable-join-button-switch');
-    const delayOtherActivities = document.getElementById('delay-other-activities-switch');
+    const statusDisplayTypeSelect = document.getElementById('status-display-type-select');
     
     function sendUpdate() {
         browser.runtime.sendMessage({
             action: "updateSettings",
             enableJoinButton: enableJoinButtonSwitch.checked,
-            delayOtherActivities: delayOtherActivities.checked
+            statusDisplayType: parseInt(statusDisplayTypeSelect.value)
         });
     }
     backImg.addEventListener('click', () => {
@@ -21,16 +21,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (enableJoinButtonSwitchState !== null) {
         enableJoinButtonSwitch.checked = enableJoinButtonSwitchState === 'true';
     }
-    const delayOtherActivitiesState = localStorage.getItem('delayOtherActivities');
-    if (delayOtherActivitiesState !== null) {
-        delayOtherActivities.checked = delayOtherActivitiesState === 'true';
+    const statusDisplayTypeState = localStorage.getItem('statusDisplayType');
+    if (statusDisplayTypeState !== null) {
+        statusDisplayTypeSelect.value = statusDisplayTypeState;
     }
-    enableJoinButtonSwitch.addEventListener('change', () => {
-        localStorage.setItem('enableJoinButton', enableJoinButtonSwitch.checked);
-        sendUpdate();
-    })
-    delayOtherActivities.addEventListener('change', () => {
-        localStorage.setItem('delayOtherActivities', delayOtherActivities.checked);
+    statusDisplayTypeSelect.addEventListener('change', () => {
+        localStorage.setItem('statusDisplayType', statusDisplayTypeSelect.value);
         sendUpdate();
     })
 });

@@ -12,25 +12,24 @@ body {
     color: #fff;
 }
 
-.switch-container {
+.container {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 15px;
 }
 
-.switch-label a {
+label a {
     color: #00a8fc;
     text-decoration: none;
 }
 
-.switch-label a:hover {
+label a:hover {
     text-decoration: underline;
 }
 
-.switch-label {
+label {
     order: 1;
-    margin-right: 10px;
     font-size: 15px;
     white-space: nowrap;
     overflow: hidden;
@@ -150,14 +149,22 @@ input:checked:disabled+.slider:before,
     vertical-align: top;
 }
 
-.switch-container-right {
+.container-right {
     order: 2;
     width: 70px;
     height: auto;
     display: flex; 
     justify-content: flex-end;
+    gap: 5px;
+    margin-right: 10px;
 }
 
-.switch-container-right img {
-    padding-right: 5px;
+.container-right select {
+    width: 100%;
+    padding: 2px 5px;
+    background-color: #333;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
 }

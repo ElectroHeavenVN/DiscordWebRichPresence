@@ -46,7 +46,7 @@ function refreshInfo() {
                 button1Text: "Listen on SoundCloud",
                 button1Url: songLink,
                 button2Text: "View artist",
-                button2Url: songAuthorLink,
+                button2Url: songAuthorLink
             };
             if (!playing) {
                 data.smallImage = SmallIcons.paused;

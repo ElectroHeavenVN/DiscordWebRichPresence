@@ -7,7 +7,7 @@ if (typeof browser === "undefined") {
 }
 var currentActivities = [];
 var enableJoinButton;
-var delayOtherActivities;
+var statusDisplayType;
 
 const ActivityFlags = {
 	Instance: 1 << 0,
@@ -40,7 +40,7 @@ setInterval(CheckDisconnectedActivities, 5000);
 browser.storage.local.get("settings", settings => {
 	settings = settings.settings;
 	enableJoinButton = settings.enableJoinButton;
-	delayOtherActivities = settings.delayOtherActivities;
+	statusDisplayType = settings.statusDisplayType;
 });
 
 function SendMessageToDiscordTab(message) {
@@ -133,8 +133,8 @@ browser.runtime.onConnect.addListener(port => {
 			else
 				ResetActivities();
 			SendMessageToDiscordTab({
-				action: "updateDelayOtherActivities",
-				value: delayOtherActivities
+				action: "updateStatusDisplayType",
+				value: statusDisplayType
 			});
 			browser.storage.local.get("status", status => {
 				status = status.status;
@@ -279,14 +279,14 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 				browser.storage.local.set({
 					"settings": {
 						enableJoinButton: request.enableJoinButton,
-						delayOtherActivities: request.delayOtherActivities
+						statusDisplayType: request.statusDisplayType
 					}
 				});
 				enableJoinButton = request.enableJoinButton;
-				delayOtherActivities = request.delayOtherActivities;
+				statusDisplayType = request.statusDisplayType;
 				SendMessageToDiscordTab({
-					action: "updateDelayOtherActivities",
-					value: delayOtherActivities
+					action: "updateStatusDisplayType",
+					value: statusDisplayType
 				});
 				RemoveOldActivities();
 				if (currentActivities.length == 0)
