@@ -7,7 +7,6 @@ if (typeof browser === "undefined") {
 }
 var currentActivities = [];
 var enableJoinButton;
-var changeListeningToSp;
 var delayOtherActivities;
 
 const ActivityFlags = {
@@ -41,7 +40,6 @@ setInterval(CheckDisconnectedActivities, 5000);
 browser.storage.local.get("settings", settings => {
 	settings = settings.settings;
 	enableJoinButton = settings.enableJoinButton;
-	changeListeningToSp = settings.changeListeningToSp;
 	delayOtherActivities = settings.delayOtherActivities;
 });
 
@@ -281,12 +279,10 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 				browser.storage.local.set({
 					"settings": {
 						enableJoinButton: request.enableJoinButton,
-						changeListeningToSp: request.changeListeningToSp,
 						delayOtherActivities: request.delayOtherActivities
 					}
 				});
 				enableJoinButton = request.enableJoinButton;
-				changeListeningToSp = request.changeListeningToSp;
 				delayOtherActivities = request.delayOtherActivities;
 				SendMessageToDiscordTab({
 					action: "updateDelayOtherActivities",
@@ -302,17 +298,6 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 						activity.activity.flags |= ActivityFlags.Embedded;
 					else if ((activity.activity.flags & ActivityFlags.Embedded) == ActivityFlags.Embedded)
 						activity.activity.flags ^= ActivityFlags.Embedded;
-					if (changeListeningToSp && activity.activity.type == ActivityType.Listening && activity.activity.name !== "Spotify") {
-						activity.activity.details = '[' + activity.activity.name + '] ' + activity.activity.details;
-						activity.activity.state = activity.activity.state;
-						activity.activity.name = "Spotify";
-						if (activity.activity.button1Url)
-							activity.activity.contextUri = activity.activity.syncID = activity.activity.button1Url;
-						if (activity.activity.button2Url)
-							activity.activity.artistIDs = [activity.activity.button2Url];
-						activity.activity.albumID = "0";
-						activity.activity.metadataType = "track";
-					}
 					filteredActivities.push(activity.activity);
 				}
 				SendMessageToDiscordTab({
@@ -380,17 +365,6 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 						activity.activity.flags |= ActivityFlags.Embedded;
 					else if ((activity.activity.flags & ActivityFlags.Embedded) == ActivityFlags.Embedded)
 						activity.activity.flags ^= ActivityFlags.Embedded;
-					if (changeListeningToSp && activity.activity.type == ActivityType.Listening && activity.activity.name !== "Spotify") {
-						activity.activity.details = '[' + activity.activity.name + '] ' + activity.activity.details;
-						activity.activity.state = activity.activity.state;
-						activity.activity.name = "Spotify";
-						if (activity.activity.button1Url)
-							activity.activity.contextUri = activity.activity.syncID = activity.activity.button1Url;
-						if (activity.activity.button2Url)
-							activity.activity.artistIDs = [activity.activity.button2Url];
-						activity.activity.albumID = "0";
-						activity.activity.metadataType = "track";
-					}
 				}
 				filteredActivities.push(activity.activity);
 			}
