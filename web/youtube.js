@@ -6,16 +6,6 @@ var lastchannelProfilePicture = "";
 var lastTimeStamp = 0;
 var sentReset = false;
 
-var ytInitialData = null;
-
-document.addEventListener('ytInitialDataResponse', function (msg) {
-    ytInitialData = msg.detail;
-});
-
-setInterval(() => {
-    document.dispatchEvent(new CustomEvent('getYtInitialData'));
-}, 3000);
-
 function refreshInfo() {
     if (location.pathname !== "/watch" && !location.pathname.includes("/embed/") && !location.pathname.includes("/shorts/") && location.pathname !== "/")
         return;
@@ -83,31 +73,12 @@ function refreshInfo() {
             if (videoOwner != null) {
                 let isCollaboration = videoOwner.querySelector('a').href === '';
                 if (isCollaboration) {
-                    if (ytInitialData == null)
-                    {
-                        document.dispatchEvent(new CustomEvent('getYtInitialData'));
-                        return;
-                    }
-                    let videoOwnerRenderer = ytInitialData.contents.twoColumnWatchNextResults.results.results.contents[1].videoSecondaryInfoRenderer.owner.videoOwnerRenderer;
-                    channelProfilePicture = videoOwnerRenderer.avatarStack.avatarStackViewModel.avatars[0].avatarViewModel.image.sources[0].url;
-                    let channels = videoOwnerRenderer.navigationEndpoint.showDialogCommand.panelLoadingStrategy.inlineContent.dialogViewModel.customContent.listViewModel.listItems;
-                    channels = channels.map(c => c.listItemViewModel.title);
-                    channelLink = "https://www.youtube.com" + channels[0].commandRuns[0].onTap.innertubeCommand.browseEndpoint.canonicalBaseUrl;
-                    channelNameSmallText = channels[0].content;
-                    channelName  = "";
-                    for (let i = 0; i < channels.length; i++) {
-                        channelName += channels[i].content;
-                        if (i < channels.length - 2)
-                            channelName += ", ";
-                        else if (i === channels.length - 2)
-                            channelName += " and ";
-                    }
+                    //TODO
+                    return;
                 }
-                else {
-                    channelProfilePicture = videoOwner.querySelector("#img").src;
-                    channelLink = videoOwner.querySelector("#channel-name a").href;
-                    channelName = channelNameSmallText = videoOwner.querySelector("#channel-name a").innerText;
-                }
+                channelProfilePicture = videoOwner.querySelector("#img").src;
+                channelLink = videoOwner.querySelector("#channel-name a").href;
+                channelName = channelNameSmallText = videoOwner.querySelector("#channel-name a").innerText;
             }
         }
         if (isYTShorts) {
