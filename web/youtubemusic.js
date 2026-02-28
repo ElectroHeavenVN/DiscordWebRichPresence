@@ -55,18 +55,19 @@ function refreshInfo() {
             lastPlaying = playing;
             lastTitle = title;
             lastTimeStamp = Date.now() - timePassed;
-
+            let songLink = "https://music.youtube.com/watch?v=" + videoId;
             data = {
                 applicationId: appId,
                 type: ActivityType.Listening,
                 name: "YouTube Music",
                 details: title,
+                detailsUrl: songLink,
                 state: authorsText,
                 largeImage: thumbnailLink,
                 timeStart: lastTimeStamp,
                 timeEnd: timeEnd,
                 button1Text: "Listen on YouTube Music",
-                button1Url: "https://music.youtube.com/watch?v=" + videoId,
+                button1Url: songLink,
                 largeText: '',
             };
             if (album !== '') {
@@ -78,6 +79,7 @@ function refreshInfo() {
                 data.button2Text = "View channel";
                 data.button2Url = document.querySelector("span.subtitle.style-scope.ytmusic-player-bar a").href;
             }
+            data.stateUrl = data.button2Url;
             if (!playing) {
                 data.smallImage = SmallIcons.paused;
                 data.smallText = "Paused";

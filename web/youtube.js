@@ -89,7 +89,7 @@ function refreshInfo() {
             if (document.querySelector("#content > #page-manager> ytd-watch-flexy") == null)
                 return;
             videoId = document.querySelector("#content > #page-manager> ytd-watch-flexy").getAttribute("video-id");
-            isMemberOnly = document.querySelector("#below > ytd-watch-metadata .badge-style-type-members-only") != null;
+            isMemberOnly = document.querySelector("#below > ytd-watch-metadata ytd-badge-supported-renderer .yt-badge-shape--membership") != null;
         }
     }
     if (lastPlaying !== playing || lastTitle !== title || channelProfilePicture !== lastchannelProfilePicture || (!isLiveStreaming && playing && Math.abs(Date.now() - lastTimeStamp - elapsed) >= 1000)) {
@@ -107,12 +107,15 @@ function refreshInfo() {
         var largeText = "";
         if (isMemberOnly)
             largeText = "Members only";
+        let videoLink = "https://www.youtube.com/" + (isYTShorts ? "shorts/" : "watch?v=") + videoId;
         data = {
             applicationId: appId,
             type: ActivityType.Watching,
             name: "YouTube" + (isYTShorts ? " Shorts" : ""),
             details: title,
+            detailsUrl: videoLink,
             state: channelName,
+            stateUrl: channelLink,
             timeEnd: timeEnd,
             timeStart: lastTimeStamp,
             largeImage: "https://i.ytimg.com/vi/" + videoId + "/hqdefault.jpg",
@@ -120,7 +123,7 @@ function refreshInfo() {
             smallImage: channelProfilePicture,
             smallText: channelNameSmallText,
             button1Text: isLiveStreaming ? "Watch livestream on YouTube" : "Watch video on YouTube" + (isYTShorts ? " Shorts" : ""),
-            button1Url: "https://www.youtube.com/" + (isYTShorts ? "shorts/" : "watch?v=") + videoId,
+            button1Url: videoLink,
             button2Text: "View channel",
             button2Url: channelLink,
         };

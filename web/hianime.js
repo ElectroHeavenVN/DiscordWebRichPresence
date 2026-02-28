@@ -95,6 +95,7 @@ setTimeout(() => {
                 type: ActivityType.Watching,
                 name: "HiAnime",
                 details: title,
+                detailsUrl: link,
                 state: currentState,
                 timeStart: lastTimeStamp,
                 timeEnd: timeEnd,

@@ -51,6 +51,7 @@ function refreshInfo() {
 				type: ActivityType.Listening,
 				name: "NhacCuaTui",
 				details: title,
+				detailsUrl: songLink,
 				state: songAuthors,
 				largeImage: artworkLink,
 				timeStart: lastTimeStamp,

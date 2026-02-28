@@ -11,7 +11,12 @@ port.onMessage.addListener(msg => {
 				closeOK = true;
 				break;
 			case "updateStatusDisplayType":
-				document.dispatchEvent(new CustomEvent('updateStatusDisplayType', { detail: { value: msg.value } }));
+				let updateStatusDisplayTypeValue;
+				if (typeof cloneInto != 'undefined')
+					updateStatusDisplayTypeValue = cloneInto(msg.value, document.defaultView);
+				else
+					updateStatusDisplayTypeValue = msg.value;
+				document.dispatchEvent(new CustomEvent('updateStatusDisplayType', { detail: updateStatusDisplayTypeValue }));
 				break;
 			case "resetActivities":
 				document.dispatchEvent(new CustomEvent('resetActivities'));

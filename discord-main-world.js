@@ -54,9 +54,6 @@
                     otherActivities = j.d.activities;
                     if (gotReponseFromBGWorker) {
                         GetActivities().then(activities => {
-                            for (let i = 0; i < activities.length; i++) {
-                                activities[i].status_display_type = statusDisplayType;
-                            }
                             j.d.activities = activities;
                             d = JSON.stringify(j);
                             SendDataToDiscordWS(this.downstreamSocket, d);
@@ -83,7 +80,8 @@
     });
 
     document.addEventListener('updateStatusDisplayType', function (msg) {
-        statusDisplayType = msg.detail.value;
+        statusDisplayType = msg.detail;
+        SendDiscordActivity();
     });
 
     document.addEventListener('resetActivities', function () {
@@ -160,7 +158,8 @@
                 metadata: {
                     button_urls: []
                 },
-                timestamps: {}
+                timestamps: {},
+                status_display_type: statusDisplayType
             };
             if (typeof (activityFromBGWorker.flags) === "number")
                 activity.flags = activityFromBGWorker.flags;
@@ -168,8 +167,12 @@
                 activity.url = activityFromBGWorker.streamUrl;
             if (typeof (activityFromBGWorker.details) === "string" && activityFromBGWorker.details !== null && activityFromBGWorker.details.length > 0)
                 activity.details = activityFromBGWorker.details;
+            if (typeof (activityFromBGWorker.details_url) === "string" && activityFromBGWorker.details_url !== null && activityFromBGWorker.details_url.length > 0)
+                activity.details_url = activityFromBGWorker.details_url;
             if (typeof (activityFromBGWorker.state) === "string" && activityFromBGWorker.state !== null && activityFromBGWorker.state.length > 0)
                 activity.state = activityFromBGWorker.state;
+            if (typeof (activityFromBGWorker.state_url) === "string" && activityFromBGWorker.state_url !== null && activityFromBGWorker.state_url.length > 0)
+                activity.state_url = activityFromBGWorker.state_url;
             if (activityFromBGWorker.timeStart)
                 activity.timestamps.start = activityFromBGWorker.timeStart;
             if (activityFromBGWorker.timeEnd)
@@ -240,6 +243,7 @@
             }
             result.unshift(activity);
         };
+        
         return result;
     }
 
@@ -272,7 +276,9 @@
                     name: activity.name,
                     streamUrl: activity.streamUrl,
                     details: activity.details,
+                    details_url: activity.detailsUrl,
                     state: activity.state,
+                    state_url: activity.stateUrl,
                     partyCur: activity.partyCur,
                     partyMax: activity.partyMax,
                     largeImage: activity.largeImage,
