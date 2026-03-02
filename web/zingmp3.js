@@ -17,16 +17,7 @@ function refreshInfo() {
         var audioPlayers = document.getElementsByTagName('audio');
         var videoPlayers = document.getElementsByTagName('video');
         if (audioPlayers.length == 0 && videoPlayers.length == 0) {
-            if (!sentReset) {
-                data = false;
-                try {
-                    browser.runtime.sendMessage({
-                        id,
-                        action: "reset"
-                    });
-                    sentReset = true;
-                } catch (e) { }
-            }
+            sendReset(id);
             return;
         }
         let timePassed = 0;
@@ -73,6 +64,7 @@ function refreshInfo() {
                 detailsUrl: songLink,
                 state: songAuthors,
                 largeImage: artworkLink,
+                largeUrl: songLink,
                 timeStart: lastTimeStamp,
                 timeEnd: timeEnd,
                 button1Text: "Nghe trên Zing MP3",
@@ -95,13 +87,7 @@ function refreshInfo() {
                 data.smallImage = SmallIcons.playing;
                 data.smallText = "Playing";
             }
-            sentReset = false;
-            setTimeout(() => {
-                browser.runtime.sendMessage({
-                    id,
-                    status: data
-                });
-            }, 10);
+            sendStatus(id);
         }
     }
 }

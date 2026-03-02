@@ -1,9 +1,9 @@
 const id = 'bandcamp';
-const appId = "1256165440909213777"; //Official SoundCloud Discord application
+const appId = "1256165440909213777";
 var lastPlaying = false;
 var lastSong = "";
 var lastTimeStamp = 0;
-var sentReset = false;
+var resetSent = false;
 
 function refreshInfo()
 {
@@ -32,41 +32,30 @@ function refreshInfo()
         lastPlaying = playing;
         lastSong = song;
         lastTimeStamp = Date.now() - timePassed;
-        if (playing) {
-            data = {
-                applicationId: appId,
-                type: ActivityType.Listening,
-                name: "Bandcamp",
-                details: song,
-                detailsUrl: songLink,
-                state: songAuthor,
-                stateUrl: songAuthorLink,
-                largeImage: artworkLink,
-                smallImage: songAuthorProfilePic,
-                smallText: songAuthor,
-                timeStart: lastTimeStamp,
-                timeEnd: Date.now() - timePassed + duration,
-                button1Text: "Listen on Bandcamp",
-                button1Url: songLink,
-                button2Text: "View artist",
-                button2Url: songAuthorLink,
-            };
-            sentReset = false;
-            setTimeout(() => {
-                browser.runtime.sendMessage({
-                    id,
-                    status: data
-                });
-            }, 10);
-        } else if (!sentReset) {
-            data = false;
-            try {
-                browser.runtime.sendMessage({
-                    id,
-                    action: "reset"
-                });
-                sentReset = true;
-            } catch (e) { }
+        if (!playing) {
+            sendReset(id);
+            return;
         }
+        data = {
+            applicationId: appId,
+            type: ActivityType.Listening,
+            name: "Bandcamp",
+            details: song,
+            detailsUrl: songLink,
+            state: songAuthor,
+            stateUrl: songAuthorLink,
+            largeImage: artworkLink,
+            largeUrl: songLink,
+            smallImage: songAuthorProfilePic,
+            smallText: songAuthor,
+            smallUrl: songAuthorLink,
+            timeStart: lastTimeStamp,
+            timeEnd: Date.now() - timePassed + duration,
+            button1Text: "Listen on Bandcamp",
+            button1Url: songLink,
+            button2Text: "View artist",
+            button2Url: songAuthorLink,
+        };
+        sendStatus(id);
     }
 }

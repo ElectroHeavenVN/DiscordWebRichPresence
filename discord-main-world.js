@@ -9,6 +9,7 @@
     var currentActivities = [];
     var currentActivitiesFromBGWorker = [];
     var statusDisplayType = 0;
+    var platform = "desktop";
     var gotReponseFromBGWorker = false;
     var cachedExternalImages = [];
 
@@ -79,8 +80,9 @@
         UpdateActivityData(msg.detail);
     });
 
-    document.addEventListener('updateStatusDisplayType', function (msg) {
-        statusDisplayType = msg.detail;
+    document.addEventListener('updateRPCSettings', function (msg) {
+        statusDisplayType = msg.detail.statusDisplayType;
+        platform = msg.detail.platform;
         SendDiscordActivity();
     });
 
@@ -142,11 +144,15 @@
         });
     }
 
+    function checkStringValid(str) {
+        return typeof (str) === "string" && str !== null && str.length > 0;
+    }
+
     async function GetActivities() {
         var result = [];
         for (let i = 0; i < currentActivitiesFromBGWorker.length; i++) {
             var activityFromBGWorker = currentActivitiesFromBGWorker[i];
-            if (typeof (activityFromBGWorker.applicationId) !== "string" || activityFromBGWorker.applicationId === null || activityFromBGWorker.applicationId.length === 0 || activityFromBGWorker.applicationId === "0")
+            if (!checkStringValid(activityFromBGWorker.applicationId) || activityFromBGWorker.applicationId === "0")
                 continue;
             let activity = {
                 application_id: activityFromBGWorker.applicationId,
@@ -159,35 +165,40 @@
                     button_urls: []
                 },
                 timestamps: {},
-                status_display_type: statusDisplayType
+                status_display_type: statusDisplayType,
+                platform: platform
             };
             if (typeof (activityFromBGWorker.flags) === "number")
                 activity.flags = activityFromBGWorker.flags;
             if (activityFromBGWorker.type === 1)
                 activity.url = activityFromBGWorker.streamUrl;
-            if (typeof (activityFromBGWorker.details) === "string" && activityFromBGWorker.details !== null && activityFromBGWorker.details.length > 0)
+            if (checkStringValid(activityFromBGWorker.details))
                 activity.details = activityFromBGWorker.details;
-            if (typeof (activityFromBGWorker.details_url) === "string" && activityFromBGWorker.details_url !== null && activityFromBGWorker.details_url.length > 0)
-                activity.details_url = activityFromBGWorker.details_url;
-            if (typeof (activityFromBGWorker.state) === "string" && activityFromBGWorker.state !== null && activityFromBGWorker.state.length > 0)
+            if (checkStringValid(activityFromBGWorker.detailsUrl))
+                activity.details_url = activityFromBGWorker.detailsUrl;
+            if (checkStringValid(activityFromBGWorker.state))
                 activity.state = activityFromBGWorker.state;
-            if (typeof (activityFromBGWorker.state_url) === "string" && activityFromBGWorker.state_url !== null && activityFromBGWorker.state_url.length > 0)
-                activity.state_url = activityFromBGWorker.state_url;
+            if (checkStringValid(activityFromBGWorker.stateUrl))
+                activity.state_url = activityFromBGWorker.stateUrl;
             if (activityFromBGWorker.timeStart)
                 activity.timestamps.start = activityFromBGWorker.timeStart;
             if (activityFromBGWorker.timeEnd)
                 activity.timestamps.end = activityFromBGWorker.timeEnd;
-            if (typeof (activityFromBGWorker.largeText) === "string" && activityFromBGWorker.largeText !== null && activityFromBGWorker.largeText.length > 0)
+            if (checkStringValid(activityFromBGWorker.largeText))
                 activity.assets.large_text = activityFromBGWorker.largeText;
-            if (typeof (activityFromBGWorker.smallText) === "string" && activityFromBGWorker.smallText !== null && activityFromBGWorker.smallText.length > 0)
+            if (checkStringValid(activityFromBGWorker.largeUrl))
+                activity.assets.large_url = activityFromBGWorker.largeUrl;
+            if (checkStringValid(activityFromBGWorker.smallText))
                 activity.assets.small_text = activityFromBGWorker.smallText;
-            if (typeof (activityFromBGWorker.button1Text) === "string" && activityFromBGWorker.button1Text !== null && activityFromBGWorker.button1Text.length > 0)
+            if (checkStringValid(activityFromBGWorker.smallUrl))
+                activity.assets.small_url = activityFromBGWorker.smallUrl;
+            if (checkStringValid(activityFromBGWorker.button1Text))
                 activity.buttons[0] = activityFromBGWorker.button1Text;
-            if (typeof (activityFromBGWorker.button1Url) === "string" && activityFromBGWorker.button1Url !== null && activityFromBGWorker.button1Url.length > 0)
+            if (checkStringValid(activityFromBGWorker.button1Url))
                 activity.metadata.button_urls[0] = activityFromBGWorker.button1Url;
-            if (typeof (activityFromBGWorker.button2Text) === "string" && activityFromBGWorker.button2Text !== null && activityFromBGWorker.button2Text.length > 0)
+            if (checkStringValid(activityFromBGWorker.button2Text))
                 activity.buttons[1] = activityFromBGWorker.button2Text;
-            if (typeof (activityFromBGWorker.button2Url) === "string" && activityFromBGWorker.button2Url !== null && activityFromBGWorker.button2Url.length > 0)
+            if (checkStringValid(activityFromBGWorker.button2Url))
                 activity.metadata.button_urls[1] = activityFromBGWorker.button2Url;
             if (typeof (activityFromBGWorker.partyCur) === "number" && typeof (activityFromBGWorker.partyMax) === "number")
                 activity.party = {
@@ -198,12 +209,12 @@
                 };
 
             let links = [];
-            if (typeof (activityFromBGWorker.largeImage) === "string" && activityFromBGWorker.largeImage !== null && activityFromBGWorker.largeImage.length > 0) {
+            if (checkStringValid(activityFromBGWorker.largeImage)) {
                 if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/(attachments|app-icons|app-assets)\//.test(activityFromBGWorker.largeImage))
                     activity.assets.large_image = "mp:" + activityFromBGWorker.largeImage.replace(/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");
                 links.push(activityFromBGWorker.largeImage);
             }
-            if (typeof (activityFromBGWorker.smallImage) === "string" && activityFromBGWorker.smallImage !== null && activityFromBGWorker.smallImage.length > 0) {
+            if (checkStringValid(activityFromBGWorker.smallImage)) {
                 if (/https?:\/\/(cdn|media)\.discordapp\.(com|net)\/(attachments|app-icons|app-assets)\//.test(activityFromBGWorker.smallImage))
                     activity.assets.small_image = "mp:" + activityFromBGWorker.smallImage.replace(/https?:\/\/(cdn|media)\.discordapp\.(com|net)\//, "");
                 links.push(activityFromBGWorker.smallImage);
@@ -276,15 +287,17 @@
                     name: activity.name,
                     streamUrl: activity.streamUrl,
                     details: activity.details,
-                    details_url: activity.detailsUrl,
+                    detailsUrl: activity.detailsUrl,
                     state: activity.state,
-                    state_url: activity.stateUrl,
+                    stateUrl: activity.stateUrl,
                     partyCur: activity.partyCur,
                     partyMax: activity.partyMax,
                     largeImage: activity.largeImage,
                     largeText: activity.largeText,
+                    largeUrl: activity.largeUrl,
                     smallImage: activity.smallImage,
                     smallText: activity.smallText,
+                    smallUrl: activity.smallUrl,
                     timeStart: activity.timeStart,
                     timeEnd: activity.timeEnd,
                     button1Text: activity.button1Text,

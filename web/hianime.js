@@ -21,16 +21,8 @@ setTimeout(() => {
             total = 0;
         if (listening) {
             if (!location.pathname.includes("/watch/")) {
-                if (!sentReset) {
-                    data = false;
-                    try {
-                        browser.runtime.sendMessage({
-                            id,
-                            action: "reset"
-                        });
-                        sentReset = true;
-                    } catch (e) { }
-                }
+                sendReset(id);
+                return;
             }
             title = document.querySelector("#ani_detail div.anis-watch-wrap div.anis-watch-detail div.anisc-detail h2 a").title;
             var eps = document.querySelector("#detail-ss-list > div").children;
@@ -101,8 +93,10 @@ setTimeout(() => {
                 timeEnd: timeEnd,
                 largeImage: cover,
                 largeText: currentEp,
+                largeUrl: link,
                 smallImage: 'https://cdn.discordapp.com/app-icons/1223343776941211798/04251a85dc268c18e889f9ef2c7f3a49.png',
                 smallText: 'HiAnime',
+                smallUrl: window.location.origin,
                 button1Text: "Watch on HiAnime",
                 button1Url: link,
                 button2Text: "Official HiAnime site",
@@ -118,13 +112,7 @@ setTimeout(() => {
             //     data.smallImage = SmallIcons.playing;
             //     data.smallText = "Playing";
             // }
-            sentReset = false;
-            setTimeout(() => {
-                browser.runtime.sendMessage({
-                    id,
-                    status: data
-                });
-            }, 10);
+            sendStatus(id);
         }
     });
 }, 1000);
@@ -132,16 +120,7 @@ setTimeout(() => {
 function refreshInfo() {
     var iframe = document.querySelector("#iframe-embed");
     if (iframe === null) {
-        if (!sentReset) {
-            data = false;
-            try {
-                browser.runtime.sendMessage({
-                    id,
-                    action: "reset"
-                });
-                sentReset = true;
-            } catch (e) { }
-        }
+        sendReset(id);
         return;
     }
     browser.runtime.sendMessage(

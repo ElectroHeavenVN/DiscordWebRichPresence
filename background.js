@@ -8,6 +8,7 @@ if (typeof browser === "undefined") {
 var currentActivities = [];
 var enableJoinButton;
 var statusDisplayType;
+var platform;
 
 const ActivityFlags = {
 	Instance: 1 << 0,
@@ -41,6 +42,7 @@ browser.storage.local.get("settings", settings => {
 	settings = settings.settings;
 	enableJoinButton = settings.enableJoinButton;
 	statusDisplayType = settings.statusDisplayType;
+	platform = settings.platform;
 });
 
 function SendMessageToDiscordTab(message) {
@@ -133,8 +135,11 @@ browser.runtime.onConnect.addListener(port => {
 			else
 				ResetActivities();
 			SendMessageToDiscordTab({
-				action: "updateStatusDisplayType",
-				value: statusDisplayType
+				action: "updateRPCSettings",
+				value: {
+					statusDisplayType: statusDisplayType,
+					platform: platform
+				}
 			});
 			browser.storage.local.get("status", status => {
 				status = status.status;
@@ -279,14 +284,19 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 				browser.storage.local.set({
 					"settings": {
 						enableJoinButton: request.enableJoinButton,
-						statusDisplayType: request.statusDisplayType
+						statusDisplayType: request.statusDisplayType,
+						platform: request.platform	
 					}
 				});
 				enableJoinButton = request.enableJoinButton;
 				statusDisplayType = request.statusDisplayType;
+				platform = request.platform;
 				SendMessageToDiscordTab({
-					action: "updateStatusDisplayType",
-					value: statusDisplayType
+					action: "updateRPCSettings",
+					value: {
+						statusDisplayType: statusDisplayType,
+						platform: platform
+					}
 				});
 				RemoveOldActivities();
 				if (currentActivities.length == 0)

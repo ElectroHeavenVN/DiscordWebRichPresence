@@ -3,7 +3,6 @@ const appId = "463151177836658699" //From https://github.com/PreMiD/Presences/tr
 var lastPlaying = false;
 var lastTitle = "";
 var lastTimeStamp = 0;
-var sentReset = false;
 
 function refreshInfo() {
     if (listening) {
@@ -17,16 +16,7 @@ function refreshInfo() {
         }
         var videoPlayer = document.getElementsByTagName('video')[0];
         if (videoPlayer == null) {
-            if (!sentReset) {
-                data = false;
-                try {
-                    browser.runtime.sendMessage({
-                        id,
-                        action: "reset"
-                    });
-                    sentReset = true;
-                } catch (e) { }
-            }
+            sendReset(id);
             return;
         }
         var timePassed = Math.round(videoPlayer.currentTime * 1000)
@@ -63,15 +53,16 @@ function refreshInfo() {
                 details: title,
                 detailsUrl: songLink,
                 state: authorsText,
+                stateUrl: authors.length > 0 ? authors[0].href : undefined,
                 largeImage: thumbnailLink,
                 timeStart: lastTimeStamp,
                 timeEnd: timeEnd,
                 button1Text: "Listen on YouTube Music",
                 button1Url: songLink,
-                largeText: '',
             };
             if (album !== '') {
                 data.largeText = album;
+                data.largeUrl = albumElement.href;
                 data.button2Text = "View album";
                 data.button2Url = albumElement.href;
             }
@@ -79,7 +70,6 @@ function refreshInfo() {
                 data.button2Text = "View channel";
                 data.button2Url = document.querySelector("span.subtitle.style-scope.ytmusic-player-bar a").href;
             }
-            data.stateUrl = data.button2Url;
             if (!playing) {
                 data.smallImage = SmallIcons.paused;
                 data.smallText = "Paused";
@@ -90,13 +80,7 @@ function refreshInfo() {
                 data.smallImage = SmallIcons.playing;
                 data.smallText = "Playing";
             }
-            sentReset = false;
-            setTimeout(() => {
-                browser.runtime.sendMessage({
-                    id,
-                    status: data
-                });
-            }, 10);
+            sendStatus(id);
         }
     }
 }

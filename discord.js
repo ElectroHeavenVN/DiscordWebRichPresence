@@ -10,13 +10,13 @@ port.onMessage.addListener(msg => {
 			case "close":
 				closeOK = true;
 				break;
-			case "updateStatusDisplayType":
-				let updateStatusDisplayTypeValue;
+			case "updateRPCSettings":
+				let updateSettingsValue;
 				if (typeof cloneInto != 'undefined')
-					updateStatusDisplayTypeValue = cloneInto(msg.value, document.defaultView);
+					updateSettingsValue = cloneInto(msg.value, document.defaultView);
 				else
-					updateStatusDisplayTypeValue = msg.value;
-				document.dispatchEvent(new CustomEvent('updateStatusDisplayType', { detail: updateStatusDisplayTypeValue }));
+					updateSettingsValue = msg.value;
+				document.dispatchEvent(new CustomEvent('updateRPCSettings', { detail: updateSettingsValue }));
 				break;
 			case "resetActivities":
 				document.dispatchEvent(new CustomEvent('resetActivities'));

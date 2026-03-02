@@ -43,6 +43,7 @@ function refreshInfo() {
                 state: songAuthor,
                 stateUrl: songAuthorLink,
                 largeImage: artworkLink,
+                largeUrl: songLink,
                 timeStart: lastTimeStamp,
                 timeEnd: timeEnd,
                 button1Text: "Listen on SoundCloud",
@@ -60,24 +61,9 @@ function refreshInfo() {
                 data.smallImage = SmallIcons.playing;
                 data.smallText = "Playing";
             }
-            sentReset = false;
-            setTimeout(() => {
-                browser.runtime.sendMessage({
-                    id,
-                    status: data
-                });
-            }, 10);
+            sendStatus(id);
         }
     } catch (e) {
-        if (!sentReset) {
-            data = false;
-            try {
-                browser.runtime.sendMessage({
-                    id,
-                    action: "reset"
-                });
-                sentReset = true;
-            } catch (e) { }
-        }
+        sendReset(id);
     }
 }

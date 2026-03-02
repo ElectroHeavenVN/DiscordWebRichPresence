@@ -14,16 +14,7 @@ function refreshInfo() {
 			artworkLink = "";
 		var audioPlayers = document.getElementsByTagName('audio');
 		if (audioPlayers.length === 0) {
-			if (!sentReset) {
-				data = false;
-				try {
-					browser.runtime.sendMessage({
-						id,
-						action: "reset"
-					});
-					sentReset = true;
-				} catch (e) { }
-			}
+			sendReset(id);
 			return;
 		}
 		let timePassed = Math.round(audioPlayers[0].currentTime * 1000);
@@ -54,6 +45,7 @@ function refreshInfo() {
 				detailsUrl: songLink,
 				state: songAuthors,
 				largeImage: artworkLink,
+				largeUrl: songLink,
 				timeStart: lastTimeStamp,
 				timeEnd: timeEnd,
 				button1Text: "Nghe trên NhacCuaTui",
@@ -69,13 +61,7 @@ function refreshInfo() {
 				data.smallImage = SmallIcons.playing;
 				data.smallText = "Playing";
 			}
-			sentReset = false;
-			setTimeout(() => {
-				browser.runtime.sendMessage({
-					id,
-					status: data
-				});
-			}, 10);
+			sendStatus(id);
 		}
 	}
 }

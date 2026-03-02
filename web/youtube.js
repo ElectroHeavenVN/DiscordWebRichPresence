@@ -13,14 +13,7 @@ function refreshInfo() {
     if (location.pathname !== "/watch" && !location.pathname.includes("/embed/") && !isYTShorts && !sentReset) {
         var miniPlayer = document.querySelector("#movie_player > div.ytp-miniplayer-ui");
         if (miniPlayer == null || miniPlayer.style.display == "none") {
-            data = false;
-            try {
-                browser.runtime.sendMessage({
-                    id,
-                    action: "reset"
-                });
-                sentReset = true;
-            } catch (e) { }
+            sendReset(id);
             return;
         }
     }
@@ -120,8 +113,10 @@ function refreshInfo() {
             timeStart: lastTimeStamp,
             largeImage: "https://i.ytimg.com/vi/" + videoId + "/hqdefault.jpg",
             largeText: largeText,
+            largeUrl: videoLink,
             smallImage: channelProfilePicture,
             smallText: channelNameSmallText,
+            smallUrl: channelLink,
             button1Text: isLiveStreaming ? "Watch livestream on YouTube" : "Watch video on YouTube" + (isYTShorts ? " Shorts" : ""),
             button1Url: videoLink,
             button2Text: "View channel",
@@ -130,14 +125,10 @@ function refreshInfo() {
         if (!playing) {
             data.smallImage = SmallIcons.paused;
             data.smallText = "Paused";
+            data.smallUrl = undefined;
             data.timeStart = undefined;
             data.timeEnd = undefined;
         }
-        setTimeout(() => {
-            browser.runtime.sendMessage({
-                id,
-                status: data
-            });
-        }, 10);
+        sendStatus(id);
     }
 }
