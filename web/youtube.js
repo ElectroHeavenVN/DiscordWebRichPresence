@@ -29,7 +29,7 @@ function refreshInfo() {
         isMemberOnly = false;
     if (listening) {
         if (isYTShorts)
-            var shortsVideoElement = Array.from(document.querySelector("#shorts-inner-container").querySelectorAll("ytd-reel-video-renderer")).find(r => r.hasAttribute("is-active"));
+            var shortsVideoElement = document.querySelector("#shorts-inner-container ytd-reel-video-renderer");
         if (document.querySelector(".html5-video-player") != null)
             playing = document.querySelector(".html5-video-player#" + (isYTShorts ? "shorts-player" : "movie_player")).classList.contains("playing-mode");
         var originalTitleElement = document.querySelector("#info .title");
