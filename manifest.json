@@ -123,12 +123,11 @@
 		},
 		{
 			"matches": [
-				"https://hianimez.to/*",
-				"https://hianime.to/*"
+				"https://vieon.vn/*"
 			],
 			"all_frames": true,
 			"js": [
-				"web/hianime.js",
+				"web/vieon.js",
 				"content_script.js"
 			],
 			"run_at": "document_idle"
